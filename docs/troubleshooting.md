@@ -25,10 +25,10 @@ flowchart TD
 Collect these first:
 
 ```sh
-sudo systemctl status isp-loss-monitor --no-pager -l
-sudo journalctl -u isp-loss-monitor -n 100 --no-pager
+sudo systemctl status uplink-ledger --no-pager -l
+sudo journalctl -u uplink-ledger -n 100 --no-pager
 sudo ss -ltnp '( sport = :80 or sport = :443 )'
-sudo -u ispmon psql -d isp_loss_monitor -c 'SELECT 1;'
+sudo -u uplinkledger psql -d uplink_ledger -c 'SELECT 1;'
 timedatectl status
 ```
 
@@ -41,10 +41,10 @@ Run the installed program's argument validation through its normal unit
 configuration by reading the journal. Then verify required files and commands:
 
 ```sh
-sudo cat /etc/sysconfig/isp-loss-monitor
+sudo cat /etc/sysconfig/uplink-ledger
 command -v python3 ping traceroute ip curl psql
-sudo -u ispmon test -r /etc/isp-loss-monitor/server.crt
-sudo -u ispmon test -r /etc/isp-loss-monitor/server.key
+sudo -u uplinkledger test -r /etc/uplink-ledger/server.crt
+sudo -u uplinkledger test -r /etc/uplink-ledger/server.key
 ```
 
 Common startup-stopping failures are:
@@ -60,20 +60,20 @@ Common startup-stopping failures are:
 
 ## PostgreSQL peer authentication fails
 
-The operating-system and PostgreSQL identities must both be `ispmon`:
+The operating-system and PostgreSQL identities must both be `uplinkledger`:
 
 ```sh
-id ispmon
+id uplinkledger
 sudo -u postgres psql -Atc \
-  "SELECT rolname FROM pg_roles WHERE rolname='ispmon';"
-sudo -u ispmon psql -d isp_loss_monitor -c 'SELECT current_user;'
+  "SELECT rolname FROM pg_roles WHERE rolname='uplinkledger';"
+sudo -u uplinkledger psql -d uplink_ledger -c 'SELECT current_user;'
 ```
 
 Confirm this rule occurs before broader local rules in
 `/var/lib/pgsql/data/pg_hba.conf`:
 
 ```text
-local   isp_loss_monitor   ispmon   peer
+local   uplink_ledger   uplinkledger   peer
 ```
 
 Then reload:
@@ -91,16 +91,16 @@ Check permissions and certificate metadata:
 
 ```sh
 sudo ls -l \
-  /etc/isp-loss-monitor/server.crt \
-  /etc/isp-loss-monitor/server.key
-sudo -u ispmon test -r /etc/isp-loss-monitor/server.key
+  /etc/uplink-ledger/server.crt \
+  /etc/uplink-ledger/server.key
+sudo -u uplinkledger test -r /etc/uplink-ledger/server.key
 openssl x509 \
-  -in /etc/isp-loss-monitor/server.crt \
+  -in /etc/uplink-ledger/server.crt \
   -noout -subject -issuer -dates -ext subjectAltName
 ```
 
 The key must be PEM encoded and unencrypted. Correct ownership is
-`root:ispmon`; mode should be `0640`.
+`root:uplinkledger`; mode should be `0640`.
 
 If the service starts but a browser warns, verify DNS, SAN, chain completeness,
 client time, and client trust for the issuer.
@@ -131,8 +131,8 @@ curl --head http://monitor.example.com/history?limit=288
 ```
 
 Expect status `308` and an HTTPS `Location` preserving path and query. Check
-that `--http-redirect-port 80` remains in `ISPMON_ARGS`, TLS is configured, and
-port 80 is not owned by another service.
+that `--http-redirect-port 80` remains in `UPLINK_LEDGER_ARGS`, TLS is
+configured, and port 80 is not owned by another service.
 
 ## Router is unavailable or wrong
 
@@ -154,7 +154,7 @@ Many ISP routers filter or rate-limit traceroute responses:
 
 ```sh
 traceroute -n -m 12 -q 1 -w 2 1.1.1.1
-sudo -u ispmon cat /var/lib/isp-loss-monitor/discovery-cache.json
+sudo -u uplinkledger cat /var/lib/uplink-ledger/discovery-cache.json
 ```
 
 Behavior depends on prior state:
@@ -169,7 +169,7 @@ The service retries discovery at the configured period.
 ## Public-IP check fails
 
 ```sh
-sudo -u ispmon curl --fail --silent --show-error \
+sudo -u uplinkledger curl --fail --silent --show-error \
   --proto '=https' \
   https://ipv4.icanhazip.com/
 ```
@@ -183,8 +183,8 @@ Confirm normal and service-user behavior:
 
 ```sh
 ping -n -c 5 -i 0.2 -W 2 1.1.1.1
-sudo -u ispmon ping -n -c 5 -i 0.2 -W 2 1.1.1.1
-sudo systemctl show isp-loss-monitor \
+sudo -u uplinkledger ping -n -c 5 -i 0.2 -W 2 1.1.1.1
+sudo systemctl show uplink-ledger \
   -p AmbientCapabilities -p CapabilityBoundingSet -p NoNewPrivileges
 ```
 
@@ -203,8 +203,8 @@ curl --fail 'https://monitor.example.com/api/status?limit=1'
 Look for either `current` or `next_interval_start`. Then query PostgreSQL:
 
 ```sh
-sudo -u ispmon psql -d isp_loss_monitor -c \
-  'SELECT count(*), max(interval_end) FROM isp_loss_intervals;'
+sudo -u uplinkledger psql -d uplink_ledger -c \
+  'SELECT count(*), max(interval_end) FROM uplink_ledger_intervals;'
 ```
 
 Frequent restarts, clock changes, or stops before interval deadlines can leave
@@ -215,8 +215,8 @@ intentional gaps.
 Inspect gaps between completed records:
 
 ```sh
-sudo -u ispmon psql -d isp_loss_monitor -c \
-  "SELECT interval_start, interval_end, interval_start - lag(interval_end) OVER (ORDER BY interval_start) AS gap FROM isp_loss_intervals ORDER BY interval_start DESC LIMIT 20;"
+sudo -u uplinkledger psql -d uplink_ledger -c \
+  "SELECT interval_start, interval_end, interval_start - lag(interval_end) OVER (ORDER BY interval_start) AS gap FROM uplink_ledger_intervals ORDER BY interval_start DESC LIMIT 20;"
 ```
 
 A gap greater than ten minutes begins a new continuous group. The runtime card
@@ -259,11 +259,11 @@ hop as proof of forwarding loss.
 ## Collect a redacted diagnostic bundle
 
 ```sh
-sudo systemctl status isp-loss-monitor --no-pager -l
-sudo journalctl -u isp-loss-monitor -n 200 --no-pager
-sudo -u ispmon psql -d isp_loss_monitor -c \
-  'SELECT count(*), min(interval_start), max(interval_end) FROM isp_loss_intervals;'
-python3 /opt/isp-loss-monitor/isp_loss_monitor.py --version
+sudo systemctl status uplink-ledger --no-pager -l
+sudo journalctl -u uplink-ledger -n 200 --no-pager
+sudo -u uplinkledger psql -d uplink_ledger -c \
+  'SELECT count(*), min(interval_start), max(interval_end) FROM uplink_ledger_intervals;'
+python3 /opt/uplink-ledger/uplink_ledger.py --version
 ```
 
 Before sharing, remove public/private addresses, hostnames, certificate details,

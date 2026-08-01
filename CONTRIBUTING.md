@@ -36,7 +36,7 @@ isolated.
 git clone https://github.com/jodytripp/uplink-ledger.git
 cd uplink-ledger
 
-python3 -m py_compile isp_loss_monitor.py import_csv_to_postgres.py scripts/check_docs.py
+python3 -m py_compile uplink_ledger.py import_csv_to_postgres.py scripts/check_docs.py
 python3 scripts/check_docs.py
 sh -n install.sh
 python3 -m unittest discover -s tests -v
@@ -86,11 +86,11 @@ Before changing a stored or operational contract, identify the migration for:
 
 - PostgreSQL tables, keys, or data types;
 - CSV header/schema version;
-- `ISPMON_ARGS` and command-line options;
+- `UPLINK_LEDGER_ARGS` and command-line options;
 - discovery cache schema;
 - static API response fields;
 - `/opt`, `/etc`, and `/var/lib` paths;
-- `ispmon` identity and `isp-loss-monitor.service`; and
+- `uplinkledger` identity and `uplink-ledger.service`; and
 - chart history or diagnosis semantics.
 
 An existing operator should be able to upgrade without losing history,

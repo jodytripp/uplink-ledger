@@ -9,6 +9,6 @@
 # upstream firewall. Port 80 serves redirects only.
 #
 # Full option and sampling guidance:
-#   /opt/isp-loss-monitor/docs/configuration.md
+#   /opt/uplink-ledger/docs/configuration.md
 
-ISPMON_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/isp-loss-monitor/isp-packet-loss.csv --discovery-cache /var/lib/isp-loss-monitor/discovery-cache.json --postgres-url postgresql:///isp_loss_monitor --tls-cert /etc/isp-loss-monitor/server.crt --tls-key /etc/isp-loss-monitor/server.key --terminal-mode lines"
+UPLINK_LEDGER_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/uplink-ledger/uplink-ledger.csv --discovery-cache /var/lib/uplink-ledger/discovery-cache.json --postgres-url postgresql:///uplink_ledger --tls-cert /etc/uplink-ledger/server.crt --tls-key /etc/uplink-ledger/server.key --terminal-mode lines"

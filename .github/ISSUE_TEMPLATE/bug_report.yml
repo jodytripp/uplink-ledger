@@ -16,7 +16,7 @@ body:
     id: version
     attributes:
       label: Uplink Ledger version
-      description: Run `python3 /opt/isp-loss-monitor/isp_loss_monitor.py --version`.
+      description: Run `python3 /opt/uplink-ledger/uplink_ledger.py --version`.
       placeholder: 1.3.0
     validations:
       required: true

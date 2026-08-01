@@ -12,8 +12,8 @@ from pathlib import Path
 from unittest import mock
 
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "isp_loss_monitor.py"
-SPEC = importlib.util.spec_from_file_location("isp_loss_monitor", MODULE_PATH)
+MODULE_PATH = Path(__file__).resolve().parents[1] / "uplink_ledger.py"
+SPEC = importlib.util.spec_from_file_location("uplink_ledger", MODULE_PATH)
 assert SPEC and SPEC.loader
 monitor = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = monitor
@@ -481,10 +481,31 @@ class PostgresStoreTests(unittest.TestCase):
 
     def test_record_sql_is_relational_and_idempotent(self):
         sql = monitor.PostgresStore.record_sql(self.record)
-        self.assertIn("INSERT INTO isp_loss_intervals", sql)
-        self.assertIn("INSERT INTO isp_loss_measurements", sql)
+        self.assertIn("INSERT INTO uplink_ledger_intervals", sql)
+        self.assertIn("INSERT INTO uplink_ledger_measurements", sql)
         self.assertIn("ON CONFLICT (interval_start)", sql)
         self.assertEqual(sql.count("ON CONFLICT"), 6)
+
+    def test_schema_migrates_legacy_table_and_index_names(self):
+        schema = monitor.POSTGRES_SCHEMA_SQL
+        self.assertIn(
+            "ALTER TABLE isp_loss_intervals RENAME TO uplink_ledger_intervals",
+            schema,
+        )
+        self.assertIn(
+            "ALTER TABLE isp_loss_measurements RENAME TO uplink_ledger_measurements",
+            schema,
+        )
+        self.assertIn(
+            "CREATE TABLE IF NOT EXISTS uplink_ledger_intervals",
+            schema,
+        )
+
+    def test_postgres_default_uses_product_database_name(self):
+        self.assertEqual(
+            monitor.PostgresStore().database_url,
+            "postgresql:///uplink_ledger",
+        )
 
     def test_import_batches_records(self):
         store = monitor.PostgresStore()

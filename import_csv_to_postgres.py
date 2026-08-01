@@ -7,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from isp_loss_monitor import CsvStore, PostgresStore
+from uplink_ledger import CsvStore, PostgresStore
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--csv", required=True, type=Path, help="source CSV file")
     parser.add_argument(
         "--postgres-url",
-        default="postgresql:///isp_loss_monitor",
+        default="postgresql:///uplink_ledger",
         help="PostgreSQL URI using local peer auth by default",
     )
     parser.add_argument(

@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 TARGET_ORDER = ("gateway", "isp_hop", "cloudflare", "google", "quad9")
 TARGET_LABELS = {
     "gateway": "Router",
@@ -825,7 +825,39 @@ class CsvStore:
 
 
 POSTGRES_SCHEMA_SQL = """
-CREATE TABLE IF NOT EXISTS isp_loss_intervals (
+DO $uplink_ledger_migration$
+BEGIN
+    IF to_regclass('public.isp_loss_intervals') IS NOT NULL
+       AND to_regclass('public.uplink_ledger_intervals') IS NOT NULL THEN
+        RAISE EXCEPTION
+            'both legacy and Uplink Ledger interval tables exist; merge them before starting';
+    ELSIF to_regclass('public.isp_loss_intervals') IS NOT NULL THEN
+        ALTER TABLE isp_loss_intervals RENAME TO uplink_ledger_intervals;
+    END IF;
+
+    IF to_regclass('public.isp_loss_measurements') IS NOT NULL
+       AND to_regclass('public.uplink_ledger_measurements') IS NOT NULL THEN
+        RAISE EXCEPTION
+            'both legacy and Uplink Ledger measurement tables exist; merge them before starting';
+    ELSIF to_regclass('public.isp_loss_measurements') IS NOT NULL THEN
+        ALTER TABLE isp_loss_measurements RENAME TO uplink_ledger_measurements;
+    END IF;
+
+    IF to_regclass('public.isp_loss_intervals_end_idx') IS NOT NULL
+       AND to_regclass('public.uplink_ledger_intervals_end_idx') IS NULL THEN
+        ALTER INDEX isp_loss_intervals_end_idx
+            RENAME TO uplink_ledger_intervals_end_idx;
+    END IF;
+
+    IF to_regclass('public.isp_loss_measurements_target_idx') IS NOT NULL
+       AND to_regclass('public.uplink_ledger_measurements_target_idx') IS NULL THEN
+        ALTER INDEX isp_loss_measurements_target_idx
+            RENAME TO uplink_ledger_measurements_target_idx;
+    END IF;
+END
+$uplink_ledger_migration$;
+
+CREATE TABLE IF NOT EXISTS uplink_ledger_intervals (
     interval_start timestamptz PRIMARY KEY,
     interval_end timestamptz NOT NULL,
     duration_seconds double precision,
@@ -834,9 +866,9 @@ CREATE TABLE IF NOT EXISTS isp_loss_intervals (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS isp_loss_measurements (
+CREATE TABLE IF NOT EXISTS uplink_ledger_measurements (
     interval_start timestamptz NOT NULL
-        REFERENCES isp_loss_intervals(interval_start) ON DELETE CASCADE,
+        REFERENCES uplink_ledger_intervals(interval_start) ON DELETE CASCADE,
     target_key text NOT NULL,
     label text NOT NULL,
     address inet,
@@ -851,10 +883,10 @@ CREATE TABLE IF NOT EXISTS isp_loss_measurements (
     PRIMARY KEY (interval_start, target_key)
 );
 
-CREATE INDEX IF NOT EXISTS isp_loss_intervals_end_idx
-    ON isp_loss_intervals (interval_end DESC);
-CREATE INDEX IF NOT EXISTS isp_loss_measurements_target_idx
-    ON isp_loss_measurements (target_key, interval_start DESC);
+CREATE INDEX IF NOT EXISTS uplink_ledger_intervals_end_idx
+    ON uplink_ledger_intervals (interval_end DESC);
+CREATE INDEX IF NOT EXISTS uplink_ledger_measurements_target_idx
+    ON uplink_ledger_measurements (target_key, interval_start DESC);
 """
 
 
@@ -877,7 +909,7 @@ def postgres_number(value: Any) -> str:
 class PostgresStore:
     def __init__(
         self,
-        database_url: str = "postgresql:///isp_loss_monitor",
+        database_url: str = "postgresql:///uplink_ledger",
         psql_command: str = "psql",
     ) -> None:
         self.database_url = database_url
@@ -927,7 +959,7 @@ class PostgresStore:
         diagnosis = record["diagnosis"]
         statements = [
             (
-                "INSERT INTO isp_loss_intervals "
+                "INSERT INTO uplink_ledger_intervals "
                 "(interval_start, interval_end, duration_seconds, "
                 "status_code, status_message) VALUES "
                 f"({start}::timestamptz, "
@@ -949,7 +981,7 @@ class PostgresStore:
                 "NULL" if not address else f"{postgres_text(address)}::inet"
             )
             statements.append(
-                "INSERT INTO isp_loss_measurements "
+                "INSERT INTO uplink_ledger_measurements "
                 "(interval_start, target_key, label, address, sent, received, "
                 "loss_pct, rtt_min_ms, rtt_avg_ms, rtt_max_ms, jitter_ms, errors) "
                 "VALUES "
@@ -1005,7 +1037,7 @@ class PostgresStore:
 WITH recent AS (
     SELECT interval_start, interval_end, duration_seconds,
            status_code, status_message
-    FROM isp_loss_intervals
+    FROM uplink_ledger_intervals
     ORDER BY interval_start DESC
     LIMIT {int(limit)}
 )
@@ -1036,7 +1068,7 @@ SELECT json_build_object(
     )
 )::text
 FROM recent
-JOIN isp_loss_measurements AS measurements
+JOIN uplink_ledger_measurements AS measurements
   ON measurements.interval_start = recent.interval_start
 GROUP BY recent.interval_start, recent.interval_end, recent.duration_seconds,
          recent.status_code, recent.status_message
@@ -1067,7 +1099,7 @@ ORDER BY recent.interval_start;
 WITH ordered AS (
     SELECT interval_start, interval_end,
            lag(interval_end) OVER (ORDER BY interval_start) AS previous_end
-    FROM isp_loss_intervals
+    FROM uplink_ledger_intervals
 ),
 grouped AS (
     SELECT interval_start, interval_end,
@@ -1337,7 +1369,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/csv; charset=utf-8")
         self.send_header(
             "Content-Disposition",
-            'attachment; filename="isp-packet-loss.csv"',
+            'attachment; filename="uplink-ledger.csv"',
         )
         self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
@@ -1497,7 +1529,7 @@ class TerminalReporter:
             return
         lines = [
             "\033[2J\033[H",
-            f" ISP QUALITY MONITOR  {dt.datetime.now().astimezone():%Y-%m-%d %H:%M:%S %Z}",
+            f" UPLINK LEDGER  {dt.datetime.now().astimezone():%Y-%m-%d %H:%M:%S %Z}",
             "=" * 92,
             f" Dashboard: {self.dashboard_url}",
             f" Interval:  {current['start']}  "
@@ -1898,8 +1930,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--csv",
         type=Path,
-        default=Path("isp-packet-loss.csv"),
-        help="CSV log path (default: ./isp-packet-loss.csv)",
+        default=Path("uplink-ledger.csv"),
+        help="CSV log path (default: ./uplink-ledger.csv)",
     )
     parser.add_argument(
         "--discovery-cache",
@@ -1926,10 +1958,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--postgres-url",
-        default="postgresql:///isp_loss_monitor",
+        default="postgresql:///uplink_ledger",
         help=(
             "PostgreSQL connection URI "
-            "(default: postgresql:///isp_loss_monitor via local peer auth)"
+            "(default: postgresql:///uplink_ledger via local peer auth)"
         ),
     )
     parser.add_argument(

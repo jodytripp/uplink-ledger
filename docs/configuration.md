@@ -1,26 +1,26 @@
 # Configuration
 
 The installed service reads one shell-style environment value from
-`/etc/sysconfig/isp-loss-monitor`:
+`/etc/sysconfig/uplink-ledger`:
 
 ```text
-ISPMON_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/isp-loss-monitor/isp-packet-loss.csv --discovery-cache /var/lib/isp-loss-monitor/discovery-cache.json --postgres-url postgresql:///isp_loss_monitor --tls-cert /etc/isp-loss-monitor/server.crt --tls-key /etc/isp-loss-monitor/server.key --terminal-mode lines"
+UPLINK_LEDGER_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/uplink-ledger/uplink-ledger.csv --discovery-cache /var/lib/uplink-ledger/discovery-cache.json --postgres-url postgresql:///uplink_ledger --tls-cert /etc/uplink-ledger/server.crt --tls-key /etc/uplink-ledger/server.key --terminal-mode lines"
 ```
 
 Edit the value, then restart the service. There is no live configuration
 reload.
 
 ```sh
-sudo vi /etc/sysconfig/isp-loss-monitor
-sudo systemctl restart isp-loss-monitor
-sudo systemctl status isp-loss-monitor --no-pager -l
+sudo vi /etc/sysconfig/uplink-ledger
+sudo systemctl restart uplink-ledger
+sudo systemctl status uplink-ledger --no-pager -l
 ```
 
 ## Configuration layers
 
 ```mermaid
 flowchart LR
-    UNIT["systemd unit<br/>identity, capabilities, hardening"] --> ENV["sysconfig<br/>ISPMON_ARGS"]
+    UNIT["systemd unit<br/>identity, capabilities, hardening"] --> ENV["sysconfig<br/>UPLINK_LEDGER_ARGS"]
     ENV --> CLI["Python argument validation"]
     CLI --> RUN["Monitor configuration"]
     CERT["TLS files"] --> RUN
@@ -42,9 +42,9 @@ certificate permissions are configured outside the application.
 | `--tls-cert PATH` | none | Required certificate/full-chain PEM for installed service. |
 | `--tls-key PATH` | none | Required unencrypted private-key PEM for installed service. |
 | `--insecure-http` | false | Testing only; explicitly permits serving without TLS. |
-| `--postgres-url URI` | `postgresql:///isp_loss_monitor` | Local socket and peer auth; PostgreSQL is mandatory. |
-| `--csv PATH` | `./isp-packet-loss.csv` | Installed under `/var/lib/isp-loss-monitor`. |
-| `--discovery-cache PATH` | `./discovery-cache.json` | Installed under `/var/lib/isp-loss-monitor`. |
+| `--postgres-url URI` | `postgresql:///uplink_ledger` | Local socket and peer auth; PostgreSQL is mandatory. |
+| `--csv PATH` | `./uplink-ledger.csv` | Installed under `/var/lib/uplink-ledger`. |
+| `--discovery-cache PATH` | `./discovery-cache.json` | Installed under `/var/lib/uplink-ledger`. |
 | `--web-root PATH` | `web` beside program | Static dashboard asset directory. |
 | `--gateway-address IPv4` | automatic | Overrides Router discovery when needed. |
 | `--public-ip-url HTTPS_URL` | `https://ipv4.icanhazip.com/` | Returns one public IPv4 address. Must use HTTPS. |
@@ -60,7 +60,7 @@ certificate permissions are configured outside the application.
 Run the installed program with `--help` to see the authoritative reference:
 
 ```sh
-python3 /opt/isp-loss-monitor/isp_loss_monitor.py --help
+python3 /opt/uplink-ledger/uplink_ledger.py --help
 ```
 
 ## Sampling math
@@ -128,12 +128,13 @@ time and avoid DNS failures contaminating measurements.
 The installed URI:
 
 ```text
-postgresql:///isp_loss_monitor
+postgresql:///uplink_ledger
 ```
 
 means “connect to the local PostgreSQL server over its Unix socket, use the
-current OS username, and open database `isp_loss_monitor`.” The service runs as
-`ispmon`, so peer authentication maps it to PostgreSQL role `ispmon`.
+current OS username, and open database `uplink_ledger`.” The service runs as
+`uplinkledger`, so peer authentication maps it to PostgreSQL role
+`uplinkledger`.
 
 PostgreSQL is not an optional sink. Startup fails if schema creation, history
 loading, CSV synchronization, or the database connection fails. That behavior

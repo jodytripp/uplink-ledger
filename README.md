@@ -121,15 +121,15 @@ sudo systemctl enable --now postgresql
 sudo ./install.sh
 
 sudo -u postgres createuser \
-  --no-superuser --no-createdb --no-createrole ispmon
-sudo -u postgres createdb --owner=ispmon isp_loss_monitor
+  --no-superuser --no-createdb --no-createrole uplinkledger
+sudo -u postgres createdb --owner=uplinkledger uplink_ledger
 ```
 
 After configuring peer authentication and installing the TLS certificate:
 
 ```sh
-sudo systemctl enable --now isp-loss-monitor
-sudo systemctl status isp-loss-monitor
+sudo systemctl enable --now uplink-ledger
+sudo systemctl status uplink-ledger
 ```
 
 Open `https://YOUR_MONITOR_HOST/`. The service waits for the next exact
@@ -159,28 +159,29 @@ five-minute boundary before starting its first complete interval.
 The [documentation map](docs/README.md) also links common tasks directly to the
 relevant guide.
 
-## Operational compatibility
-
-The public product and repository are named **Uplink Ledger**. Existing
-operational identifiers retain the earlier name so upgrades do not fork state
-or strand deployed data:
+## Installed identifiers
 
 | Purpose | Stable identifier |
 | --- | --- |
-| Service | `isp-loss-monitor.service` |
-| Application directory | `/opt/isp-loss-monitor` |
-| Configuration | `/etc/sysconfig/isp-loss-monitor` |
-| TLS files | `/etc/isp-loss-monitor` |
-| Runtime state and CSV | `/var/lib/isp-loss-monitor` |
-| PostgreSQL database | `isp_loss_monitor` |
-| PostgreSQL and OS role | `ispmon` |
+| Service | `uplink-ledger.service` |
+| Application directory | `/opt/uplink-ledger` |
+| Configuration | `/etc/sysconfig/uplink-ledger` |
+| TLS files | `/etc/uplink-ledger` |
+| Runtime state and CSV | `/var/lib/uplink-ledger` |
+| PostgreSQL database | `uplink_ledger` |
+| PostgreSQL and OS role | `uplinkledger` |
+
+Running `install.sh` over a pre-1.4 installation migrates the earlier service
+identity, paths, database, tables, certificates, cache, and CSV history. Review
+the [upgrade procedure](docs/operations.md#upgrade-procedure) before applying
+the rename to an existing server.
 
 ## Development
 
 The runtime has no third-party Python dependencies. The release checks are:
 
 ```sh
-python3 -m py_compile isp_loss_monitor.py import_csv_to_postgres.py scripts/check_docs.py
+python3 -m py_compile uplink_ledger.py import_csv_to_postgres.py scripts/check_docs.py
 python3 scripts/check_docs.py
 sh -n install.sh
 python3 -m unittest discover -s tests -v

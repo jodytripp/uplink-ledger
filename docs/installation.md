@@ -47,8 +47,8 @@ sequenceDiagram
     Admin->>OS: Install system packages
     Admin->>PG: Initialize and start database
     Admin->>UL: Run install.sh
-    UL->>OS: Create ispmon and install service files
-    Admin->>PG: Create ispmon role and database
+    UL->>OS: Create uplinkledger and install service files
+    Admin->>PG: Create uplinkledger role and database
     Admin->>PG: Configure peer authentication
     Admin->>UL: Install TLS certificate and key
     Admin->>FW: Restrict 80/443 to trusted clients
@@ -96,7 +96,7 @@ sudo ./install.sh
 
 The installer:
 
-- creates the unprivileged `ispmon` operating-system account if needed;
+- creates the unprivileged `uplinkledger` operating-system account if needed;
 - creates application, configuration, and data directories;
 - installs the Python service, dashboard, documentation, importer, and unit;
 - installs a default sysconfig file only when one does not already exist; and
@@ -112,8 +112,8 @@ role with the same name:
 
 ```sh
 sudo -u postgres createuser \
-  --no-superuser --no-createdb --no-createrole ispmon
-sudo -u postgres createdb --owner=ispmon isp_loss_monitor
+  --no-superuser --no-createdb --no-createrole uplinkledger
+sudo -u postgres createdb --owner=uplinkledger uplink_ledger
 ```
 
 If either already exists, do not recreate it.
@@ -122,7 +122,7 @@ Add this rule to `/var/lib/pgsql/data/pg_hba.conf` **before broader local
 rules**:
 
 ```text
-local   isp_loss_monitor   ispmon   peer
+local   uplink_ledger   uplinkledger   peer
 ```
 
 PostgreSQL uses the first matching authentication rule. Reload it and verify
@@ -130,19 +130,19 @@ the socket connection:
 
 ```sh
 sudo systemctl reload postgresql
-sudo -u ispmon psql -d isp_loss_monitor -c 'SELECT current_user;'
+sudo -u uplinkledger psql -d uplink_ledger -c 'SELECT current_user;'
 ```
 
-The result should be `ispmon` without a password prompt. Uplink Ledger does not
-need a stored database password in this deployment.
+The result should be `uplinkledger` without a password prompt. Uplink Ledger
+does not need a stored database password in this deployment.
 
 ## 6. Install TLS material
 
 ```sh
-sudo install -o root -g ispmon -m 0640 fullchain.pem \
-  /etc/isp-loss-monitor/server.crt
-sudo install -o root -g ispmon -m 0640 private-key.pem \
-  /etc/isp-loss-monitor/server.key
+sudo install -o root -g uplinkledger -m 0640 fullchain.pem \
+  /etc/uplink-ledger/server.crt
+sudo install -o root -g uplinkledger -m 0640 private-key.pem \
+  /etc/uplink-ledger/server.key
 ```
 
 The private key must be unencrypted because an unattended `systemd` service
@@ -153,19 +153,19 @@ Validate the certificate before starting:
 
 ```sh
 openssl x509 \
-  -in /etc/isp-loss-monitor/server.crt \
+  -in /etc/uplink-ledger/server.crt \
   -noout -subject -issuer -dates -ext subjectAltName
 ```
 
 ## 7. Review configuration
 
 ```sh
-sudo vi /etc/sysconfig/isp-loss-monitor
+sudo vi /etc/sysconfig/uplink-ledger
 ```
 
-The supplied `ISPMON_ARGS` value listens on every IPv4 interface, serves HTTPS
-on 443, redirects 80 to HTTPS, uses local PostgreSQL peer authentication, and
-stores state under `/var/lib/isp-loss-monitor`.
+The supplied `UPLINK_LEDGER_ARGS` value listens on every IPv4 interface,
+serves HTTPS on 443, redirects 80 to HTTPS, uses local PostgreSQL peer
+authentication, and stores state under `/var/lib/uplink-ledger`.
 
 If automatic Router discovery is wrong, append an explicit address inside the
 quoted value:
@@ -199,8 +199,8 @@ allow rule takes precedence over the intended restricted-access design.
 ## 9. Start the service
 
 ```sh
-sudo systemctl enable --now isp-loss-monitor
-sudo systemctl status isp-loss-monitor --no-pager -l
+sudo systemctl enable --now uplink-ledger
+sudo systemctl status uplink-ledger --no-pager -l
 ```
 
 The first startup performs schema creation, history recovery, discovery, and
@@ -233,40 +233,37 @@ Check discovery and live state:
 
 ```sh
 curl --fail 'https://monitor.example.com/api/status?limit=1'
-sudo journalctl -u isp-loss-monitor -n 50 --no-pager
+sudo journalctl -u uplink-ledger -n 50 --no-pager
 ```
 
 After the next complete five-minute interval, verify database rows:
 
 ```sh
-sudo -u ispmon psql -d isp_loss_monitor -c \
-  'SELECT count(*), min(interval_start), max(interval_end) FROM isp_loss_intervals;'
+sudo -u uplinkledger psql -d uplink_ledger -c \
+  'SELECT count(*), min(interval_start), max(interval_end) FROM uplink_ledger_intervals;'
 ```
 
 ## Installed locations
 
 | Purpose | Location |
 | --- | --- |
-| Application and installed README | `/opt/isp-loss-monitor` |
-| Full installed guides | `/opt/isp-loss-monitor/docs` |
-| Service arguments | `/etc/sysconfig/isp-loss-monitor` |
-| TLS certificate and key | `/etc/isp-loss-monitor` |
-| CSV mirror and discovery cache | `/var/lib/isp-loss-monitor` |
-| PostgreSQL database | `isp_loss_monitor` |
-| PostgreSQL and OS role | `ispmon` |
-| `systemd` unit | `isp-loss-monitor.service` |
-
-The operational name remains `isp-loss-monitor` for upgrade compatibility;
-the product name is Uplink Ledger.
+| Application and installed README | `/opt/uplink-ledger` |
+| Full installed guides | `/opt/uplink-ledger/docs` |
+| Service arguments | `/etc/sysconfig/uplink-ledger` |
+| TLS certificate and key | `/etc/uplink-ledger` |
+| CSV mirror and discovery cache | `/var/lib/uplink-ledger` |
+| PostgreSQL database | `uplink_ledger` |
+| PostgreSQL and OS role | `uplinkledger` |
+| `systemd` unit | `uplink-ledger.service` |
 
 ## Installation checklist
 
 - [ ] Host is wired or its connection type is documented.
 - [ ] DNS resolves the dashboard hostname to the monitoring host.
 - [ ] PostgreSQL starts automatically.
-- [ ] Peer authentication works as `ispmon` without a password.
+- [ ] Peer authentication works as `uplinkledger` without a password.
 - [ ] Certificate SAN matches the dashboard hostname.
-- [ ] Private key is unencrypted and mode `0640`, owned by `root:ispmon`.
+- [ ] Private key is unencrypted and mode `0640`, owned by `root:uplinkledger`.
 - [ ] Firewall limits TCP 80 and 443 to trusted networks.
 - [ ] `/api/health` succeeds with certificate verification enabled.
 - [ ] HTTP redirects to HTTPS.

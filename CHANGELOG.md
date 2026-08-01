@@ -19,12 +19,19 @@ and this project uses semantic versioning.
 
 ### Changed
 
+- Completed the operational rename from the original monitor identifiers to
+  `uplink-ledger`: executable module, service unit, filesystem paths, sysconfig
+  variable, service identity, PostgreSQL database and tables, CSV filename,
+  terminal banner, tests, and documentation now share the product name.
+- Added installer migration for existing service state, TLS files, discovery
+  cache, CSV history, operating-system identity, and PostgreSQL identity. The
+  application migrates legacy SQL table and index names on first start.
 - Reworked the project README as a product overview and task-based
   documentation entry point.
 - Expanded contribution and security policies and linked issue/pull-request
   templates to the relevant guides.
 - Install the complete documentation set with the application so relative
-  help links also work from `/opt/isp-loss-monitor`.
+  help links also work from `/opt/uplink-ledger`.
 
 ## [1.3.0] - 2026-07-31
 

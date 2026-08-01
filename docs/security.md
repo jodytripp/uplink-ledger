@@ -18,14 +18,14 @@ flowchart LR
     subgraph Host["AlmaLinux monitoring host"]
         FW["Host firewall"]
         TLS["Uplink Ledger TLS server"]
-        SVC["ispmon service process"]
-        FILES["root:ispmon TLS files"]
-        DATA["ispmon CSV + cache"]
+        SVC["uplinkledger service process"]
+        FILES["root:uplinkledger TLS files"]
+        DATA["uplinkledger CSV + cache"]
         SOCK["PostgreSQL Unix socket"]
     end
 
     subgraph Database["Local PostgreSQL"]
-        PGROLE["peer-authenticated ispmon role"]
+        PGROLE["peer-authenticated uplinkledger role"]
         PGDATA[("Monitoring history")]
     end
 
@@ -56,7 +56,7 @@ publish the dashboard or unredacted exports casually.
 
 ## Service identity and capabilities
 
-The service runs as `ispmon`, not root. The unit grants only:
+The service runs as `uplinkledger`, not root. The unit grants only:
 
 | Capability | Reason |
 | --- | --- |
@@ -80,7 +80,7 @@ The installed unit enables:
 - `LockPersonality=yes`
 - `MemoryDenyWriteExecute=yes`
 - `RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK`
-- `ReadWritePaths=/var/lib/isp-loss-monitor`
+- `ReadWritePaths=/var/lib/uplink-ledger`
 - `UMask=0027`
 
 The process can read its installed program and configuration but can write only
@@ -99,7 +99,7 @@ Important consequences:
 
 - the certificate SAN must match the dashboard hostname;
 - browsers must trust the issuing CA;
-- the unencrypted private key must remain readable only by `root:ispmon`;
+- the unencrypted private key must remain readable only by `root:uplinkledger`;
 - certificate replacement requires a service restart; and
 - HSTS with `includeSubDomains` should be appropriate for the chosen hostname's
   parent domain policy.
@@ -107,12 +107,12 @@ Important consequences:
 Recommended file state:
 
 ```sh
-sudo chown root:ispmon \
-  /etc/isp-loss-monitor/server.crt \
-  /etc/isp-loss-monitor/server.key
+sudo chown root:uplinkledger \
+  /etc/uplink-ledger/server.crt \
+  /etc/uplink-ledger/server.key
 sudo chmod 0640 \
-  /etc/isp-loss-monitor/server.crt \
-  /etc/isp-loss-monitor/server.key
+  /etc/uplink-ledger/server.crt \
+  /etc/uplink-ledger/server.key
 ```
 
 ## HTTP behavior and headers
@@ -154,7 +154,7 @@ The default URI uses a local Unix socket. Peer authentication validates the
 operating-system identity, so no database password is stored in sysconfig,
 process arguments, or the repository.
 
-The `ispmon` PostgreSQL role is created without superuser, role creation, or
+The `uplinkledger` PostgreSQL role is created without superuser, role creation, or
 database creation privileges and owns only its database. Keep the specific
 peer rule before broader `pg_hba.conf` rules.
 
@@ -191,7 +191,7 @@ usable cache state where possible.
 - [ ] New certificate SAN matches the production hostname.
 - [ ] Issuer chain is complete.
 - [ ] Private key is unencrypted.
-- [ ] Files are `root:ispmon` and mode `0640`.
+- [ ] Files are `root:uplinkledger` and mode `0640`.
 - [ ] Service restarts without TLS errors.
 - [ ] `/api/health` validates from a trusted client.
 - [ ] Port 80 still redirects to the correct HTTPS hostname.

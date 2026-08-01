@@ -8,7 +8,7 @@ to the host. There is no generated runtime bundle.
 
 ```mermaid
 flowchart TD
-    CORE["isp_loss_monitor.py<br/>discovery, probing, persistence, HTTP, CLI"]
+    CORE["uplink_ledger.py<br/>discovery, probing, persistence, HTTP, CLI"]
     IMPORT["import_csv_to_postgres.py<br/>historical migration"]
     WEB["web/<br/>dashboard HTML, CSS, JavaScript"]
     UNIT["systemd/ + sysconfig/<br/>runtime contract"]
@@ -40,7 +40,7 @@ a production dependency.
 Run from the repository root:
 
 ```sh
-python3 -m py_compile isp_loss_monitor.py import_csv_to_postgres.py scripts/check_docs.py
+python3 -m py_compile uplink_ledger.py import_csv_to_postgres.py scripts/check_docs.py
 python3 scripts/check_docs.py
 sh -n install.sh
 python3 -m unittest discover -s tests -v
@@ -78,11 +78,11 @@ database available, plain HTTP may be explicitly enabled for loopback-only UI
 work:
 
 ```sh
-python3 isp_loss_monitor.py \
+python3 uplink_ledger.py \
   --listen 127.0.0.1 \
   --port 8443 \
   --insecure-http \
-  --postgres-url postgresql:///isp_loss_monitor \
+  --postgres-url postgresql:///uplink_ledger \
   --csv /tmp/uplink-ledger-dev.csv \
   --discovery-cache /tmp/uplink-ledger-discovery.json \
   --terminal-mode dashboard
@@ -160,7 +160,7 @@ flowchart LR
 
 Before a release:
 
-1. update `VERSION` in `isp_loss_monitor.py`;
+1. update `VERSION` in `uplink_ledger.py`;
 2. move relevant changelog entries from Unreleased to a dated version;
 3. run all validation commands;
 4. verify a representative AlmaLinux installation or upgrade for material

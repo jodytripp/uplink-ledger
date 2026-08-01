@@ -23,9 +23,9 @@ flowchart LR
 
 ```mermaid
 erDiagram
-    ISP_LOSS_INTERVALS ||--o{ ISP_LOSS_MEASUREMENTS : contains
+    UPLINK_LEDGER_INTERVALS ||--o{ UPLINK_LEDGER_MEASUREMENTS : contains
 
-    ISP_LOSS_INTERVALS {
+    UPLINK_LEDGER_INTERVALS {
         timestamptz interval_start PK
         timestamptz interval_end
         double duration_seconds
@@ -34,7 +34,7 @@ erDiagram
         timestamptz created_at
     }
 
-    ISP_LOSS_MEASUREMENTS {
+    UPLINK_LEDGER_MEASUREMENTS {
         timestamptz interval_start PK,FK
         text target_key PK
         text label
@@ -56,8 +56,8 @@ measurement.
 
 Indexes support recent-interval retrieval and per-target time series:
 
-- `isp_loss_intervals(interval_end DESC)`
-- `isp_loss_measurements(target_key, interval_start DESC)`
+- `uplink_ledger_intervals(interval_end DESC)`
+- `uplink_ledger_measurements(target_key, interval_start DESC)`
 
 ## Idempotency and recovery
 
@@ -190,13 +190,13 @@ rather than appending a new schema to an old file.
 Stop an active writer before importing its file:
 
 ```sh
-sudo systemctl stop isp-loss-monitor
-sudo -u ispmon /usr/bin/python3 \
-  /opt/isp-loss-monitor/import_csv_to_postgres.py \
-  --csv /path/to/isp-packet-loss.csv \
-  --postgres-url postgresql:///isp_loss_monitor \
+sudo systemctl stop uplink-ledger
+sudo -u uplinkledger /usr/bin/python3 \
+  /opt/uplink-ledger/import_csv_to_postgres.py \
+  --csv /path/to/uplink-ledger.csv \
+  --postgres-url postgresql:///uplink_ledger \
   --batch-size 200
-sudo systemctl start isp-loss-monitor
+sudo systemctl start uplink-ledger
 ```
 
 Batch size may be `1–5000`. Import validates the CSV header, ensures the schema,
@@ -211,7 +211,7 @@ SELECT
     count(*) AS intervals,
     min(interval_start) AS first_interval,
     max(interval_end) AS last_interval
-FROM isp_loss_intervals;
+FROM uplink_ledger_intervals;
 ```
 
 ### Per-target loss summary
@@ -222,7 +222,7 @@ SELECT
     round(avg(loss_pct)::numeric, 2) AS average_loss_pct,
     round(max(loss_pct)::numeric, 2) AS worst_loss_pct,
     count(*) AS intervals
-FROM isp_loss_measurements
+FROM uplink_ledger_measurements
 WHERE interval_start >= now() - interval '24 hours'
 GROUP BY target_key
 ORDER BY target_key;
@@ -238,7 +238,7 @@ SELECT
         WHERE m.target_key IN ('cloudflare', 'google', 'quad9')
           AND m.loss_pct >= 1.0
     ) AS affected_public_targets
-FROM isp_loss_measurements AS m
+FROM uplink_ledger_measurements AS m
 GROUP BY m.interval_start
 HAVING max(m.loss_pct) FILTER (WHERE m.target_key = 'gateway') < 1.0
    AND count(*) FILTER (
@@ -257,7 +257,7 @@ SELECT pg_size_pretty(pg_database_size(current_database()));
 Run examples through the peer-authenticated service identity:
 
 ```sh
-sudo -u ispmon psql -d isp_loss_monitor
+sudo -u uplinkledger psql -d uplink_ledger
 ```
 
 ## Data ownership and privacy

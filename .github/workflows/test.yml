@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Compile Python sources
-        run: python -m py_compile isp_loss_monitor.py import_csv_to_postgres.py scripts/check_docs.py
+        run: python -m py_compile uplink_ledger.py import_csv_to_postgres.py scripts/check_docs.py
 
       - name: Validate documentation
         run: python scripts/check_docs.py

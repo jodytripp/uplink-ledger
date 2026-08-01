@@ -15,7 +15,7 @@ sequenceDiagram
     participant NET as Network discovery
     participant WEB as HTTPS / redirect servers
 
-    SD->>UL: Start as ispmon
+    SD->>UL: Start as uplinkledger
     UL->>CSV: Ensure file and load recent records
     UL->>PG: Ensure schema
     UL->>PG: Upsert recent CSV records
@@ -33,17 +33,17 @@ should not continue in a degraded, misleading state.
 ## Everyday service commands
 
 ```sh
-sudo systemctl status isp-loss-monitor --no-pager -l
-sudo journalctl -u isp-loss-monitor -f
-sudo systemctl restart isp-loss-monitor
-sudo systemctl stop isp-loss-monitor
-sudo systemctl start isp-loss-monitor
+sudo systemctl status uplink-ledger --no-pager -l
+sudo journalctl -u uplink-ledger -f
+sudo systemctl restart uplink-ledger
+sudo systemctl stop uplink-ledger
+sudo systemctl start uplink-ledger
 ```
 
 Check the version:
 
 ```sh
-python3 /opt/isp-loss-monitor/isp_loss_monitor.py --version
+python3 /opt/uplink-ledger/uplink_ledger.py --version
 ```
 
 Check health without loading the dashboard:
@@ -119,36 +119,64 @@ git pull --ff-only
 
 python3 -m unittest discover -s tests -v
 
-sudo systemctl stop isp-loss-monitor
 sudo ./install.sh
-sudo systemctl start isp-loss-monitor
-sudo systemctl status isp-loss-monitor --no-pager -l
+sudo systemctl enable --now uplink-ledger
+sudo systemctl status uplink-ledger --no-pager -l
 ```
 
 Upgrade near a five-minute boundary when practical. Stopping during an interval
 discards only that incomplete interval. Confirm the installed version and the
 next completed database row afterward.
 
+### Upgrading from the earlier operational name
+
+Version 1.4 completes the product rename. When the installer finds the earlier
+installation, it stops and disables its unit, then migrates:
+
+- the operating-system and PostgreSQL role to `uplinkledger`;
+- the PostgreSQL database to `uplink_ledger`;
+- application, configuration, TLS, CSV, cache, and state paths;
+- the sysconfig variable and arguments; and
+- the PostgreSQL table and index names on the first new service start.
+
+If `pg_hba.conf` contains a narrow rule for the previous database and role,
+change that rule to the current values and reload PostgreSQL before starting
+the new unit:
+
+```text
+local   uplink_ledger   uplinkledger   peer
+```
+
+```sh
+sudo systemctl reload postgresql
+sudo -u uplinkledger psql -d uplink_ledger -c 'SELECT current_user;'
+sudo systemctl enable --now uplink-ledger
+```
+
+The installer stops rather than choosing when both the legacy and current OS
+or PostgreSQL identities already exist. Resolve that ambiguity before retrying;
+it will not merge two independent databases.
+
 ## Back up history
 
 PostgreSQL is authoritative. Back it up with `pg_dump`:
 
 ```sh
-sudo -u ispmon pg_dump \
+sudo -u uplinkledger pg_dump \
   --format=custom \
-  --file=/var/lib/isp-loss-monitor/isp-loss-monitor.backup \
-  isp_loss_monitor
+  --file=/var/lib/uplink-ledger/uplink-ledger.backup \
+  uplink_ledger
 ```
 
 Copy the backup to storage outside the monitoring host. Also preserve these
 small operational files when rebuilding the same installation:
 
 ```text
-/etc/sysconfig/isp-loss-monitor
-/etc/isp-loss-monitor/server.crt
-/etc/isp-loss-monitor/server.key
-/var/lib/isp-loss-monitor/discovery-cache.json
-/var/lib/isp-loss-monitor/isp-packet-loss.csv
+/etc/sysconfig/uplink-ledger
+/etc/uplink-ledger/server.crt
+/etc/uplink-ledger/server.key
+/var/lib/uplink-ledger/discovery-cache.json
+/var/lib/uplink-ledger/uplink-ledger.csv
 ```
 
 Treat the private key as sensitive. A new host may use a newly issued
@@ -162,7 +190,7 @@ Test restores into a separate empty database before relying on a backup. See
 Download the mirror from the dashboard or:
 
 ```sh
-curl --fail --output isp-packet-loss.csv \
+curl --fail --output uplink-ledger.csv \
   https://monitor.example.com/export.csv
 ```
 
@@ -170,11 +198,11 @@ To import a historical CSV archive, stop the writer and run the idempotent
 importer:
 
 ```sh
-sudo systemctl stop isp-loss-monitor
-sudo -u ispmon /usr/bin/python3 \
-  /opt/isp-loss-monitor/import_csv_to_postgres.py \
-  --csv /var/lib/isp-loss-monitor/isp-packet-loss.csv
-sudo systemctl start isp-loss-monitor
+sudo systemctl stop uplink-ledger
+sudo -u uplinkledger /usr/bin/python3 \
+  /opt/uplink-ledger/import_csv_to_postgres.py \
+  --csv /var/lib/uplink-ledger/uplink-ledger.csv
+sudo systemctl start uplink-ledger
 ```
 
 Repeated imports are safe because interval and target keys are upserted.
@@ -190,7 +218,7 @@ Actual database size depends on PostgreSQL version, indexes, address
 availability, and maintenance. Monitor it instead of guessing:
 
 ```sh
-sudo -u ispmon psql -d isp_loss_monitor -c \
+sudo -u uplinkledger psql -d uplink_ledger -c \
   "SELECT pg_size_pretty(pg_database_size(current_database()));"
 ```
 
@@ -201,11 +229,11 @@ analysis.
 ## Certificate renewal
 
 Replace the certificate and key atomically or during a short service stop,
-preserve `root:ispmon` ownership and `0640` modes, then restart:
+preserve `root:uplinkledger` ownership and `0640` modes, then restart:
 
 ```sh
-sudo systemctl restart isp-loss-monitor
-sudo journalctl -u isp-loss-monitor -n 30 --no-pager
+sudo systemctl restart uplink-ledger
+sudo journalctl -u uplink-ledger -n 30 --no-pager
 ```
 
 The Python TLS context loads certificate material only at process startup.

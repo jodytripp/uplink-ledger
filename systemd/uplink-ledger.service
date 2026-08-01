@@ -1,7 +1,7 @@
 [Unit]
 Description=Uplink Ledger Internet-path quality monitor
-Documentation=file:///opt/isp-loss-monitor/README.md
-Documentation=file:///opt/isp-loss-monitor/docs/README.md
+Documentation=file:///opt/uplink-ledger/README.md
+Documentation=file:///opt/uplink-ledger/docs/README.md
 Documentation=https://github.com/jodytripp/uplink-ledger
 Wants=network-online.target
 Requires=postgresql.service
@@ -9,11 +9,11 @@ After=network-online.target postgresql.service
 
 [Service]
 Type=simple
-User=ispmon
-Group=ispmon
-WorkingDirectory=/var/lib/isp-loss-monitor
-EnvironmentFile=/etc/sysconfig/isp-loss-monitor
-ExecStart=/usr/bin/python3 /opt/isp-loss-monitor/isp_loss_monitor.py $ISPMON_ARGS
+User=uplinkledger
+Group=uplinkledger
+WorkingDirectory=/var/lib/uplink-ledger
+EnvironmentFile=/etc/sysconfig/uplink-ledger
+ExecStart=/usr/bin/python3 /opt/uplink-ledger/uplink_ledger.py $UPLINK_LEDGER_ARGS
 Restart=on-failure
 RestartSec=5s
 TimeoutStopSec=15s
@@ -31,7 +31,7 @@ ProtectControlGroups=yes
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
-ReadWritePaths=/var/lib/isp-loss-monitor
+ReadWritePaths=/var/lib/uplink-ledger
 
 [Install]
 WantedBy=multi-user.target

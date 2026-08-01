@@ -23,7 +23,7 @@ details in that issue.
 Uplink Ledger is a trusted-network operational application:
 
 - TLS protects dashboard transport.
-- `systemd` runs the process as unprivileged user `ispmon` with two bounded
+- `systemd` runs the process as unprivileged user `uplinkledger` with two bounded
   Linux capabilities.
 - PostgreSQL uses local Unix-socket peer authentication by default.
 - Response headers restrict framing, content sources, referrers, and content
