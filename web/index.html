@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Uplink Ledger</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="title-row">
+        <h1>Uplink Ledger</h1>
+        <a class="button" href="/export.csv">Export CSV</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="status-panel" class="status-panel neutral">
+        <div>
+          <p class="eyebrow">Current assessment</p>
+          <h2 id="status-message">Collecting initial samples</h2>
+          <p id="status-detail">The first live measurements will appear shortly.</p>
+        </div>
+        <div class="interval-progress">
+          <div class="progress-label">
+            <span>Current aggregation interval</span>
+            <span id="progress-text">0%</span>
+          </div>
+          <div class="progress-track"><span id="progress-bar"></span></div>
+        </div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <span>Router</span>
+          <strong id="gateway-address">Discovering…</strong>
+          <small id="gateway-interface">Default route</small>
+        </article>
+        <article class="summary-card">
+          <span>First Hop</span>
+          <strong id="isp-hop-address">Discovering…</strong>
+          <small id="isp-hop-detail">First responding hop beyond the Router</small>
+        </article>
+        <article class="summary-card loss-range-card">
+          <span>Rolling packet-loss range</span>
+          <table class="mini-loss-table">
+            <thead>
+              <tr>
+                <th>Destination</th>
+                <th>Low</th>
+                <th>High</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>First Hop</td>
+                <td id="range-low-isp_hop">—</td>
+                <td id="range-high-isp_hop">—</td>
+              </tr>
+              <tr>
+                <td>Cloudflare</td>
+                <td id="range-low-cloudflare">—</td>
+                <td id="range-high-cloudflare">—</td>
+              </tr>
+              <tr>
+                <td>Google</td>
+                <td id="range-low-google">—</td>
+                <td id="range-high-google">—</td>
+              </tr>
+              <tr>
+                <td>Quad9</td>
+                <td id="range-low-quad9">—</td>
+                <td id="range-high-quad9">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="summary-card">
+          <span>Continuous runtime</span>
+          <strong id="runtime">—</strong>
+          <small id="sample-count">No completed intervals</small>
+        </article>
+      </section>
+
+      <section class="rolling-section" aria-labelledby="rolling-heading">
+        <div class="rolling-heading">
+          <p id="rolling-heading" class="eyebrow">Rolling packet-loss averages</p>
+        </div>
+        <div class="average-grid">
+          <article class="average-card">
+            <span>Router</span>
+            <strong id="rolling-loss-gateway">—</strong>
+            <small id="rolling-meta-gateway">No completed intervals</small>
+          </article>
+          <article class="average-card">
+            <span>First Hop</span>
+            <strong id="rolling-loss-isp_hop">—</strong>
+            <small id="rolling-meta-isp_hop">No completed intervals</small>
+          </article>
+          <article class="average-card">
+            <span>Cloudflare</span>
+            <strong id="rolling-loss-cloudflare">—</strong>
+            <small id="rolling-meta-cloudflare">No completed intervals</small>
+          </article>
+          <article class="average-card">
+            <span>Google</span>
+            <strong id="rolling-loss-google">—</strong>
+            <small id="rolling-meta-google">No completed intervals</small>
+          </article>
+          <article class="average-card">
+            <span>Quad9</span>
+            <strong id="rolling-loss-quad9">—</strong>
+            <small id="rolling-meta-quad9">No completed intervals</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Live interval</p>
+            <h2>Path measurements</h2>
+          </div>
+          <p id="last-updated" class="muted">Waiting for monitor…</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Target</th>
+                <th>Address</th>
+                <th>Packet loss</th>
+                <th>Average RTT</th>
+                <th>Maximum RTT</th>
+                <th>Jitter</th>
+                <th>Received / sent</th>
+              </tr>
+            </thead>
+            <tbody id="target-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="chart-grid">
+        <article class="panel chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2>Packet loss</h2>
+            </div>
+            <div class="chart-tools">
+              <span id="loss-chart-window" class="chart-window">Full history</span>
+              <div class="chart-controls">
+                <select data-chart-range="loss" aria-label="Packet-loss chart time range">
+                  <option value="24" selected>24 hours</option>
+                  <option value="12">12 hours</option>
+                  <option value="6">6 hours</option>
+                  <option value="4">4 hours</option>
+                  <option value="1">1 hour</option>
+                </select>
+                <button type="button" data-chart-latest="loss">Latest</button>
+              </div>
+              <span class="chart-unit">%</span>
+            </div>
+          </div>
+          <canvas id="loss-chart" data-chart-key="loss" aria-label="Zoomable packet-loss history chart"></canvas>
+          <div id="loss-tooltip" class="chart-tooltip hidden"></div>
+          <div id="loss-legend" class="legend"></div>
+        </article>
+        <article class="panel chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2>Average latency</h2>
+            </div>
+            <div class="chart-tools">
+              <span id="latency-chart-window" class="chart-window">Full history</span>
+              <div class="chart-controls">
+                <select data-chart-range="latency" aria-label="Latency chart time range">
+                  <option value="24" selected>24 hours</option>
+                  <option value="12">12 hours</option>
+                  <option value="6">6 hours</option>
+                  <option value="4">4 hours</option>
+                  <option value="1">1 hour</option>
+                </select>
+                <button type="button" data-chart-latest="latency">Latest</button>
+              </div>
+              <span class="chart-unit">ms</span>
+            </div>
+          </div>
+          <canvas id="latency-chart" data-chart-key="latency" aria-label="Zoomable latency history chart"></canvas>
+          <div id="latency-tooltip" class="chart-tooltip hidden"></div>
+          <div id="latency-legend" class="legend"></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Evidence log</p>
+            <h2>Recent five-minute intervals</h2>
+          </div>
+          <span class="muted">Times shown in your browser’s timezone</span>
+        </div>
+        <div class="table-wrap history-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Completed</th>
+                <th>Assessment</th>
+                <th>Gateway loss</th>
+                <th>ISP-hop loss</th>
+                <th>Public loss range</th>
+                <th>Public avg RTT</th>
+              </tr>
+            </thead>
+            <tbody id="history-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p id="warning" class="warning hidden"></p>
+    </main>
+
+    <footer>
+      <span>Uplink Ledger <span id="version"></span></span>
+      <span>Jitter is the mean absolute change between consecutive RTT samples.</span>
+    </footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest an improvement to Uplink Ledger
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What monitoring or operational problem should this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe how the feature should work from the operator's perspective.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and classification impact
+      description: Could this change affect how packet loss or fault attribution is interpreted?
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

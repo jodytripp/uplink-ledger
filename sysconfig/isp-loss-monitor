@@ -1,0 +1,11 @@
+# The TLS files are mandatory for the installed service. The private key must
+# be unencrypted so systemd can start the monitor without an interactive prompt.
+#
+# If automatic discovery does not identify the router, append:
+#   --gateway-address 192.168.1.1
+#
+# Binding to 0.0.0.0 makes the dashboard available on every IPv4 interface.
+# Restrict TCP 80 and 443 to trusted management networks with firewalld or an
+# upstream firewall. Port 80 serves redirects only.
+
+ISPMON_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/isp-loss-monitor/isp-packet-loss.csv --discovery-cache /var/lib/isp-loss-monitor/discovery-cache.json --postgres-url postgresql:///isp_loss_monitor --tls-cert /etc/isp-loss-monitor/server.crt --tls-key /etc/isp-loss-monitor/server.key --terminal-mode lines"

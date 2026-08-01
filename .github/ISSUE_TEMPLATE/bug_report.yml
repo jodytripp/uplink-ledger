@@ -1,0 +1,63 @@
+name: Bug report
+description: Report reproducible incorrect behavior in Uplink Ledger
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Redact public addresses, certificates,
+        keys, credentials, and private network details before submitting.
+
+  - type: input
+    id: version
+    attributes:
+      label: Uplink Ledger version
+      description: Run `python3 /opt/isp-loss-monitor/isp_loss_monitor.py --version`.
+      placeholder: 1.3.0
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: AlmaLinux 10.x, Python 3.x, PostgreSQL 16.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Configure ...
+        2. Start ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant redacted logs
+      description: Paste a small, relevant excerpt from the service journal.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed sensitive addresses, keys, certificates, and credentials.
+          required: true
