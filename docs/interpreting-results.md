@@ -1,4 +1,4 @@
-# 5 · Reading results
+# Interpreting results
 
 The dashboard answers three different questions:
 
@@ -103,7 +103,7 @@ The status message is derived in a fixed order. Loss is considered present at
 | `high_latency` | warning | No preceding loss rule matched and mean public average RTT is at least 150 ms. |
 | `healthy` | healthy | None of the above conditions matched. |
 
-See the exact decision diagram in [Evidence model](01-evidence-model.md).
+See the exact decision diagram in [Evidence model](evidence-model.md).
 
 ## Common patterns
 
@@ -165,5 +165,3 @@ Include:
 
 Avoid publishing unredacted exports or screenshots if public and private
 addresses are sensitive.
-
-Next: [Architecture and technology choices](06-architecture.md).

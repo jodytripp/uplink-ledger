@@ -1,4 +1,4 @@
-# 8 · Deployment security
+# Deployment security
 
 Uplink Ledger is a trusted-network operational tool. It encrypts browser
 traffic and runs with a constrained service identity, but it does not implement
@@ -202,5 +202,3 @@ usable cache state where possible.
 Follow [SECURITY.md](../SECURITY.md). Use GitHub private vulnerability
 reporting and never place credentials, certificates, private keys, addresses,
 database dumps, or exploit details in a public issue.
-
-Next: [Troubleshoot Uplink Ledger](09-troubleshooting.md).

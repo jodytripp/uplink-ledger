@@ -1,4 +1,4 @@
-# 3 · Configuration
+# Configuration
 
 The installed service reads one shell-style environment value from
 `/etc/sysconfig/isp-loss-monitor`:
@@ -181,5 +181,3 @@ Before changing sampling:
 - record the old and new values in an operational log;
 - restart shortly before a boundary to minimize discarded time; and
 - verify the first completed interval's sent count.
-
-Next: [Operate Uplink Ledger](04-operations.md).

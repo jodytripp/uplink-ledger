@@ -1,4 +1,4 @@
-# 10 · Development and releases
+# Development and releases
 
 Uplink Ledger keeps development close to production: the same Python files,
 static assets, shell installer, and `systemd` unit in the repository are copied
@@ -46,7 +46,7 @@ sh -n install.sh
 python3 -m unittest discover -s tests -v
 ```
 
-The documentation check validates the ordered guide set, local Markdown links,
+The documentation check validates the expected guide set, local Markdown links,
 and balanced code fences. The test suite creates temporary CSV files and mocks
 PostgreSQL subprocess calls. Two HTTP tests bind ephemeral localhost ports.
 
@@ -126,21 +126,21 @@ After a change:
 - TLS remains the installed default and port 80 remains redirect-only.
 - Packet-loss and latency chart navigation remains independent.
 
-## Documentation changes are product changes
+## Keeping documentation current
 
-Update the guide that owns the affected lifecycle stage:
+Update the guide that owns the affected behavior:
 
 | Change | Documentation |
 | --- | --- |
-| Interpretation or thresholds | `01-evidence-model.md`, `05-reading-results.md` |
-| Packages or install paths | `02-installation.md` |
-| Option or default | `03-configuration.md` |
-| Startup, shutdown, backup, upgrade | `04-operations.md` |
-| Component or dependency | `06-architecture.md` |
-| Schema, API, CSV | `07-data-and-api.md` |
-| Privilege, TLS, firewall | `08-security.md`, `SECURITY.md` |
-| Diagnostic behavior | `09-troubleshooting.md` |
-| Test or release process | `10-development.md`, `CONTRIBUTING.md` |
+| Interpretation or thresholds | `evidence-model.md`, `interpreting-results.md` |
+| Packages or install paths | `installation.md` |
+| Option or default | `configuration.md` |
+| Startup, shutdown, backup, upgrade | `operations.md` |
+| Component or dependency | `architecture.md` |
+| Schema, API, CSV | `data-and-api.md` |
+| Privilege, TLS, firewall | `security.md`, `SECURITY.md` |
+| Diagnostic behavior | `troubleshooting.md` |
+| Test or release process | `development.md`, `CONTRIBUTING.md` |
 
 Diagrams use GitHub-native Mermaid so they remain text-reviewable and versioned
 with the behavior they explain.
@@ -149,7 +149,7 @@ with the behavior they explain.
 
 ```mermaid
 flowchart LR
-    CHANGE["Implement + tests"] --> DOC["Update lifecycle docs"]
+    CHANGE["Implement + tests"] --> DOC["Update affected docs"]
     DOC --> VER["Set VERSION and changelog"]
     VER --> CHECK["Compile, shell check, unit tests"]
     CHECK --> COMMIT["Commit to main"]

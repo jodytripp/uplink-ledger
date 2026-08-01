@@ -1,4 +1,4 @@
-# 4 · Operations
+# Operations
 
 Uplink Ledger is intended to run continuously under `systemd`. PostgreSQL
 retains completed history, the CSV mirrors exports, and a short restart does
@@ -155,7 +155,7 @@ Treat the private key as sensitive. A new host may use a newly issued
 certificate rather than restoring the old key.
 
 Test restores into a separate empty database before relying on a backup. See
-[Data and API](07-data-and-api.md) for schema and CSV recovery behavior.
+[Data and API](data-and-api.md) for schema and CSV recovery behavior.
 
 ## CSV export and migration
 
@@ -215,5 +215,3 @@ The Python TLS context loads certificate material only at process startup.
 `systemctl stop` and `Ctrl+C` set the same stop event. The service cancels an
 incomplete interval, shuts down both web listeners, joins its helper threads,
 and exits. `systemd` allows 15 seconds before escalating termination.
-
-Next: [Read the dashboard and results](05-reading-results.md).

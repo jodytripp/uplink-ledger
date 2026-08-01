@@ -9,6 +9,6 @@
 # upstream firewall. Port 80 serves redirects only.
 #
 # Full option and sampling guidance:
-#   /opt/isp-loss-monitor/docs/03-configuration.md
+#   /opt/isp-loss-monitor/docs/configuration.md
 
 ISPMON_ARGS="--listen 0.0.0.0 --port 443 --http-redirect-port 80 --csv /var/lib/isp-loss-monitor/isp-packet-loss.csv --discovery-cache /var/lib/isp-loss-monitor/discovery-cache.json --postgres-url postgresql:///isp_loss_monitor --tls-cert /etc/isp-loss-monitor/server.crt --tls-key /etc/isp-loss-monitor/server.key --terminal-mode lines"

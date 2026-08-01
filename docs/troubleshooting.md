@@ -1,4 +1,4 @@
-# 9 · Troubleshooting
+# Troubleshooting
 
 Start with the symptom, then move inward from service state to dependencies,
 listeners, discovery, measurements, persistence, and browser behavior.
@@ -229,7 +229,7 @@ file, move it outside the active path, and allow Uplink Ledger to create a
 fresh header. Do not delete history until it is backed up or imported.
 
 Use the standalone importer only with a schema-version-1 file whose header
-matches this release. See [Data and API](07-data-and-api.md).
+matches this release. See [Data and API](data-and-api.md).
 
 ## API works but charts are empty or stale
 
@@ -253,7 +253,7 @@ Use the forwarding path as the stronger signal:
 - A clean Router and correlated loss across several downstream targets is the
   strongest downstream pattern.
 
-Review [Evidence model](01-evidence-model.md) before treating an intermediate
+Review [Evidence model](evidence-model.md) before treating an intermediate
 hop as proof of forwarding loss.
 
 ## Collect a redacted diagnostic bundle
@@ -269,5 +269,3 @@ python3 /opt/isp-loss-monitor/isp_loss_monitor.py --version
 Before sharing, remove public/private addresses, hostnames, certificate details,
 database contents, and other topology information not required to reproduce
 the issue.
-
-Next: [Develop and release changes](10-development.md).

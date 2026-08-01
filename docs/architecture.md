@@ -1,4 +1,4 @@
-# 6 · Architecture and technology choices
+# Architecture
 
 Uplink Ledger is one long-running Python process backed by local PostgreSQL.
 It discovers the path, schedules synchronized probes, aggregates results,
@@ -61,120 +61,6 @@ flowchart TB
     BROWSER["Trusted browser"] --> HTTPS
     BROWSER -. "port 80" .-> REDIR
 ```
-
-## Technology stack
-
-### Python standard library
-
-Python provides scheduling, subprocess control, parsing, aggregation,
-threading, TLS, HTTP, CSV, JSON, and signal handling without a third-party
-runtime package.
-
-Why it fits:
-
-- the workload is I/O-heavy rather than CPU-heavy;
-- the code is readable to Linux administrators;
-- AlmaLinux provides a maintained system Python;
-- upgrades do not depend on PyPI availability; and
-- one source file keeps deployment and incident inspection straightforward.
-
-Tradeoff: the built-in HTTP server is not a general-purpose Internet-facing
-application server. Uplink Ledger compensates by serving a small trusted-LAN
-dashboard, restricting methods and paths, enabling TLS and security headers,
-and relying on firewall boundaries rather than claiming multi-user web-app
-security.
-
-### Operating-system network tools
-
-`ping`, `traceroute`, `ip`, and `curl` remain separate executables.
-
-Why:
-
-- their behavior is familiar and independently testable from the shell;
-- they already handle platform-specific socket details;
-- ICMP does not require a custom raw-packet implementation; and
-- command output provides a useful diagnostic surface.
-
-Tradeoff: each burst creates processes and parsers must handle platform output.
-The ten-second cadence makes that cost modest, and tests cover Linux and
-FreeBSD-style ping output.
-
-### PostgreSQL through `psql`
-
-PostgreSQL supplies typed timestamps, `inet` addresses, relational integrity,
-transactions, indexes, window functions, JSON construction, and mature backup
-tools.
-
-Using `psql` instead of a Python database driver preserves the zero-third-party-
-package runtime. Writes happen once per completed interval, so connection and
-process overhead is not on a high-frequency request path.
-
-Tradeoff: PostgreSQL is a real service that must be operated. That is accepted
-because durable multi-month history, ad hoc analysis, safe upserts, and restart
-reconstruction are core requirements—not optional extras.
-
-### Static browser UI
-
-The dashboard is plain HTML, CSS, and JavaScript served from the application.
-Charts use Canvas code in the repository rather than an external library.
-
-Why:
-
-- no Node.js or build step;
-- no CDN or Internet dependency for the UI;
-- source can be inspected directly on the installed host;
-- browser polling is enough for five-minute aggregates; and
-- deployments contain exactly the reviewed assets.
-
-Tradeoff: interactive chart behavior is maintained in project code rather than
-delegated to a framework. Unit tests cover the server contract; UI changes
-also require browser verification.
-
-### `systemd`
-
-`systemd` provides service identity, boot startup, restart policy, journaling,
-Linux capabilities, dependency ordering, and sandboxing in one native unit.
-
-The service needs only two elevated capabilities:
-
-- `CAP_NET_RAW` for ICMP behavior where required; and
-- `CAP_NET_BIND_SERVICE` for ports 80 and 443.
-
-It otherwise runs as the unprivileged `ispmon` account.
-
-### Why no Docker?
-
-Containerization would not remove the need for host networking, raw-ICMP
-permission, low-port binding, durable PostgreSQL, TLS files, and host service
-management. It would add image builds, registry distribution, volume mapping,
-container networking questions, and another failure layer between the client
-and the path being measured.
-
-For this single-host network probe, a hardened native service measures the
-host's real route more directly and is easier to inspect during an outage.
-
-### Why no reverse proxy?
-
-The required web surface is small: four static assets/API routes, CSV download,
-TLS, and an HTTP redirect. Python's TLS server can provide that directly on
-443. Removing a reverse proxy means one fewer configuration and certificate
-handoff.
-
-A reverse proxy may still be appropriate in a larger managed environment, but
-it is not required by Uplink Ledger and should not make the dashboard publicly
-reachable.
-
-## Technology alternatives and tradeoffs
-
-| Alternative | Benefit | Why it is not the default |
-| --- | --- | --- |
-| SQLite | Single file, no database service | Weaker fit for continuous operational querying, concurrent tooling, typed network data, mature remote backup, and long-term expansion. |
-| Prometheus + Grafana | Powerful metrics ecosystem | Several additional services and configuration layers for a focused single-host tool; raw evidence ownership becomes distributed. |
-| Node.js frontend toolchain | Large UI ecosystem | Build artifacts, dependency updates, and runtime/toolchain complexity are unnecessary for this dashboard. |
-| Flask/FastAPI/Django | Productive web frameworks | The API surface is small and does not justify framework and server dependencies. |
-| Router-resident monitoring | Direct WAN visibility | Excludes part of the client path and ties deployment to Router firmware/platform constraints. |
-| Sequential pings | Simple control flow | Measurements would describe different time windows and weaken correlation. |
-| High-frequency raw socket engine | Fine-grained telemetry | More privilege, code, storage, and traffic than the five-minute evidence goal requires. |
 
 ## Process and thread model
 
@@ -271,5 +157,3 @@ flowchart TD
 
 The design favors visible gaps over fabricated completeness and visible
 service failure over silent loss of authoritative data.
-
-Next: [Data model, API, and exports](07-data-and-api.md).

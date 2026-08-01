@@ -4,17 +4,15 @@ Uplink Ledger exists to collect defensible Internet-path evidence without
 claiming more than ICMP observations can prove. Contributions should preserve
 that restraint, the small operational footprint, and upgrade compatibility.
 
-## Start with the system model
+## Useful references
 
-Read these before changing behavior:
+- [Development and releases](docs/development.md)
+- [Architecture](docs/architecture.md)
+- [Evidence model](docs/evidence-model.md)
+- [Configuration](docs/configuration.md)
 
-1. [Evidence model](docs/01-evidence-model.md)
-2. [Configuration contracts](docs/03-configuration.md)
-3. [Architecture and technology choices](docs/06-architecture.md)
-4. [Development and release guide](docs/10-development.md)
-
-Use [Troubleshooting](docs/09-troubleshooting.md) before treating an
-installation or environment problem as an application defect.
+Use [Troubleshooting](docs/troubleshooting.md) before treating an installation
+or environment problem as an application defect.
 
 ## Contribution flow
 
@@ -23,7 +21,7 @@ flowchart LR
     ISSUE["Describe problem or focused change"] --> BRANCH["Create focused branch"]
     BRANCH --> CODE["Implement behavior"]
     CODE --> TEST["Add or update tests"]
-    TEST --> DOC["Update lifecycle documentation"]
+    TEST --> DOC["Update affected documentation"]
     DOC --> CHECK["Run full validation"]
     CHECK --> PR["Open pull request with evidence"]
 ```
@@ -63,8 +61,8 @@ must allow binding ephemeral localhost ports.
 - Keep the dashboard independent of a JavaScript build toolchain and external
   runtime resources.
 - Add focused regression coverage for behavioral changes.
-- Update the guide that owns the affected lifecycle stage; the mapping is in
-  [Development and releases](docs/10-development.md#documentation-changes-are-product-changes).
+- Update the guide that owns the affected behavior; the mapping is in
+  [Development and releases](docs/development.md#keeping-documentation-current).
 
 ## Pull requests
 

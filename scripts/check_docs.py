@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate local Markdown links, fences, and the ordered guide set."""
+"""Validate local Markdown links, fences, and the expected guide set."""
 
 from __future__ import annotations
 
@@ -11,19 +11,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
-REQUIRED_GUIDES = [
+REQUIRED_GUIDES = {
     "README.md",
-    "01-evidence-model.md",
-    "02-installation.md",
-    "03-configuration.md",
-    "04-operations.md",
-    "05-reading-results.md",
-    "06-architecture.md",
-    "07-data-and-api.md",
-    "08-security.md",
-    "09-troubleshooting.md",
-    "10-development.md",
-]
+    "evidence-model.md",
+    "installation.md",
+    "configuration.md",
+    "operations.md",
+    "interpreting-results.md",
+    "architecture.md",
+    "data-and-api.md",
+    "security.md",
+    "troubleshooting.md",
+    "development.md",
+}
 
 
 def markdown_files() -> list[Path]:
@@ -64,12 +64,14 @@ def main() -> int:
                     f"{path.relative_to(ROOT)}: missing link target {relative}"
                 )
 
-    actual_guides = sorted(path.name for path in (ROOT / "docs").glob("*.md"))
-    if actual_guides != sorted(REQUIRED_GUIDES):
-        errors.append(
-            "docs/: expected ordered guide set "
-            + ", ".join(REQUIRED_GUIDES)
-        )
+    actual_guides = {path.name for path in (ROOT / "docs").glob("*.md")}
+    if actual_guides != REQUIRED_GUIDES:
+        missing = sorted(REQUIRED_GUIDES - actual_guides)
+        extra = sorted(actual_guides - REQUIRED_GUIDES)
+        if missing:
+            errors.append("docs/: missing guides " + ", ".join(missing))
+        if extra:
+            errors.append("docs/: unexpected guides " + ", ".join(extra))
 
     if errors:
         print("Documentation validation failed:", file=sys.stderr)

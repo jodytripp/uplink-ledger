@@ -68,27 +68,8 @@ presented as a complete measurement.
 A clean Router measurement does **not** prove that the Router's NAT,
 forwarding, or WAN interface is healthy. It proves that the monitored path from
 the host to the Router responds cleanly. See [Understanding the
-evidence](docs/01-evidence-model.md) for the complete reasoning model and its
+evidence](docs/evidence-model.md) for the complete reasoning model and its
 limitations.
-
-## Why this design
-
-Uplink Ledger deliberately favors boring, durable infrastructure:
-
-| Choice | Why it fits this application |
-| --- | --- |
-| Python standard library | One readable service with no package ecosystem or framework upgrade treadmill. |
-| Operating-system `ping`, `traceroute`, `curl`, and `psql` | Uses mature tools already understood by Linux operators and keeps packet and database behavior observable from the shell. |
-| PostgreSQL | Durable, typed, queryable history that survives restarts and can grow for long-running installations. |
-| Static HTML, CSS, and JavaScript | No build pipeline, Node.js runtime, frontend framework, or CDN dependency. |
-| Built-in HTTPS on 443 | A direct, conventional URL with no reverse proxy required; port 80 performs redirects only. |
-| `systemd` | Native startup, logging, restart policy, capabilities, and service hardening on AlmaLinux. |
-| ICMP from a client-side host | Measures the same local path real users depend on without installing monitoring software on the Router. |
-
-The result is intentionally deployable without Docker, a Python virtual
-environment, Node.js, Redis, a message broker, or a separate web server. The
-full tradeoff analysis is in [Architecture and technology
-choices](docs/06-architecture.md).
 
 ## Capabilities
 
@@ -124,8 +105,8 @@ available only through the explicit `--insecure-http` development option.
 ## Installation overview
 
 The complete procedure—including PostgreSQL peer authentication, certificate
-permissions, firewall rules, validation, upgrades, and removal—is in the
-[Installation guide](docs/02-installation.md).
+permissions, firewall rules, and validation—is in the
+[Installation guide](docs/installation.md).
 
 ```sh
 git clone https://github.com/jodytripp/uplink-ledger.git
@@ -154,34 +135,29 @@ sudo systemctl status isp-loss-monitor
 Open `https://YOUR_MONITOR_HOST/`. The service waits for the next exact
 five-minute boundary before starting its first complete interval.
 
-## Documentation: read it in this order
+## Documentation
 
-The documentation is organized around the application lifecycle rather than
-an alphabetical file list.
+### Set up and run
 
-1. [Understand the evidence model](docs/01-evidence-model.md)—what each target
-   proves, what it cannot prove, and how classification works.
-2. [Install Uplink Ledger](docs/02-installation.md)—prepare AlmaLinux,
-   PostgreSQL, TLS, the firewall, and `systemd`.
-3. [Configure measurements and services](docs/03-configuration.md)—sampling,
-   discovery, database, TLS, terminal, and history settings.
-4. [Operate it continuously](docs/04-operations.md)—startup, intervals,
-   upgrades, backup, recovery, runtime continuity, and service commands.
-5. [Read the dashboard and build an ISP case](docs/05-reading-results.md)—UI,
-   charts, diagnosis thresholds, false positives, and evidence collection.
-6. [Understand the architecture and technology choices](docs/06-architecture.md)—
-   components, threads, failure isolation, dependencies, and design tradeoffs.
-7. [Use the data model, API, CSV, and SQL](docs/07-data-and-api.md)—schema,
-   durability, endpoints, exports, imports, and useful queries.
-8. [Secure the deployment](docs/08-security.md)—trust boundaries,
-   capabilities, TLS, headers, firewalling, and certificate renewal.
-9. [Troubleshoot symptoms methodically](docs/09-troubleshooting.md)—a
-   symptom-first diagnostic path.
-10. [Develop and release changes](docs/10-development.md)—source layout,
-    local testing, test strategy, compatibility, and release workflow.
+- [Installation](docs/installation.md)
+- [Configuration](docs/configuration.md)
+- [Operations](docs/operations.md)
 
-Start at the [documentation map](docs/README.md) if you are returning with a
-specific task in mind.
+### Understand the results
+
+- [Evidence model](docs/evidence-model.md)
+- [Interpreting dashboard results](docs/interpreting-results.md)
+
+### Reference and maintenance
+
+- [Architecture](docs/architecture.md)
+- [Data model, API, CSV, and SQL](docs/data-and-api.md)
+- [Security](docs/security.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Development and releases](docs/development.md)
+
+The [documentation map](docs/README.md) also links common tasks directly to the
+relevant guide.
 
 ## Operational compatibility
 
@@ -211,12 +187,12 @@ python3 -m unittest discover -s tests -v
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the [development
-guide](docs/10-development.md) before submitting a change.
+guide](docs/development.md) before submitting a change.
 
 ## Security and license
 
 The dashboard exposes network addresses and connection-quality history. It
 provides TLS but no application login, so restrict it to trusted networks. See
-[SECURITY.md](SECURITY.md) and the [deployment security guide](docs/08-security.md).
+[SECURITY.md](SECURITY.md) and the [deployment security guide](docs/security.md).
 
 Uplink Ledger is released under the [MIT License](LICENSE).

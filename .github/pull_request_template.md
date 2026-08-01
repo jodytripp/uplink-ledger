@@ -8,7 +8,7 @@ Describe the problem and the resulting behavior.
 - [ ] Installer shell syntax passes.
 - [ ] Unit tests pass.
 - [ ] Documentation is updated when behavior or installation changes.
-- [ ] The lifecycle guide that owns this behavior remains accurate.
+- [ ] The guide that owns this behavior remains accurate.
 - [ ] Dashboard changes were checked at desktop and narrow widths.
 - [ ] Screenshots and logs contain no sensitive network information.
 
@@ -21,4 +21,4 @@ CSV files, TLS material, or systemd operation.
 
 If diagnosis, sampling, discovery, storage, dependencies, privileges, or
 security changed, explain why the new behavior still matches the contracts in
-`docs/01-evidence-model.md` and `docs/06-architecture.md`.
+`docs/evidence-model.md` and `docs/architecture.md`.

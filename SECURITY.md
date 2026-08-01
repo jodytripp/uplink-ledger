@@ -34,7 +34,7 @@ Uplink Ledger is a trusted-network operational application:
 
 The full trust-boundary diagram, capability explanation, TLS/file guidance,
 headers, threat model, and hardening checklist are in [Deployment
-security](docs/08-security.md).
+security](docs/security.md).
 
 ## Operational responsibility
 

@@ -1,4 +1,4 @@
-# 2 · Installation
+# Installation
 
 This guide installs Uplink Ledger on an AlmaLinux 10 server or VM connected to
 the LAN being measured. PostgreSQL is local and mandatory. The web dashboard
@@ -174,7 +174,7 @@ quoted value:
 --gateway-address 192.168.1.1
 ```
 
-See [Configuration](03-configuration.md) before changing measurement timing.
+See [Configuration](configuration.md) before changing measurement timing.
 
 ## 8. Restrict network access
 
@@ -271,5 +271,3 @@ the product name is Uplink Ledger.
 - [ ] `/api/health` succeeds with certificate verification enabled.
 - [ ] HTTP redirects to HTTPS.
 - [ ] A complete interval appears in PostgreSQL and the dashboard.
-
-Next: [Configure Uplink Ledger](03-configuration.md).

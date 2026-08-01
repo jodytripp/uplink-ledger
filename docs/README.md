@@ -1,54 +1,53 @@
-# Documentation map
+# Documentation
 
-This documentation follows the way Uplink Ledger is understood, deployed,
-used, and maintained. Read it from top to bottom for a new installation, or
-jump into the task-oriented path below.
+The guides are grouped by task. There is no required reading order beyond
+installing the application before operating it.
 
-```mermaid
-flowchart LR
-    E["1 · Evidence model"] --> I["2 · Installation"]
-    I --> C["3 · Configuration"]
-    C --> O["4 · Operations"]
-    O --> R["5 · Read results"]
-    R --> A["6 · Architecture"]
-    A --> D["7 · Data and API"]
-    D --> S["8 · Security"]
-    S --> T["9 · Troubleshooting"]
-    T --> V["10 · Development"]
-```
+## Setup and administration
 
-## First deployment
+- [Installation](installation.md)—packages, PostgreSQL peer authentication,
+  TLS, firewalling, service startup, and verification.
+- [Configuration](configuration.md)—listeners, discovery, sampling, storage,
+  terminal modes, defaults, and safe tuning.
+- [Operations](operations.md)—service commands, interval behavior, runtime
+  continuity, upgrades, backups, imports, retention, and certificate renewal.
+- [Security](security.md)—network boundaries, service capabilities, TLS,
+  PostgreSQL access, response headers, and deployment hardening.
+- [Troubleshooting](troubleshooting.md)—symptom-driven diagnostics for startup,
+  database, TLS, discovery, measurements, history, and browser problems.
 
-1. [Evidence model](01-evidence-model.md)
-2. [Installation](02-installation.md)
-3. [Configuration](03-configuration.md)
-4. [Operations](04-operations.md)
-5. [Reading results](05-reading-results.md)
+## Measurements and results
 
-## Understand the implementation
+- [Evidence model](evidence-model.md)—what each destination establishes,
+  metric calculations, classification rules, limitations, and defensible
+  conclusions.
+- [Interpreting results](interpreting-results.md)—dashboard sections, rolling
+  statistics, chart controls, statuses, common patterns, and ISP evidence
+  collection.
 
-6. [Architecture and technology choices](06-architecture.md)
-7. [Data model, API, and exports](07-data-and-api.md)
-8. [Deployment security](08-security.md)
+## Technical reference
 
-## Maintain or change it
-
-9. [Troubleshooting](09-troubleshooting.md)
-10. [Development and releases](10-development.md)
+- [Architecture](architecture.md)—components, threads, discovery state,
+  scheduling, persistence order, and failure handling.
+- [Data and API](data-and-api.md)—PostgreSQL schema, startup reconciliation,
+  HTTP endpoints, JSON response shape, CSV format, imports, and SQL examples.
+- [Development and releases](development.md)—source layout, validation, local
+  development, tests, compatibility contracts, and release procedure.
 
 ## Find the answer by task
 
-| I need to… | Go to… |
+| I need to… | Guide |
 | --- | --- |
-| Decide whether the evidence implicates the ISP | [Evidence model](01-evidence-model.md) and [Reading results](05-reading-results.md) |
-| Install on a new AlmaLinux host | [Installation](02-installation.md) |
-| Change ping frequency, gateway, ports, or history | [Configuration](03-configuration.md) |
-| Restart, upgrade, back up, or restore the service | [Operations](04-operations.md) |
-| Understand a card, chart, status, or threshold | [Reading results](05-reading-results.md) |
-| Understand why the application uses this stack | [Architecture](06-architecture.md) |
-| Query PostgreSQL or consume the API | [Data and API](07-data-and-api.md) |
-| Harden access or renew a certificate | [Security](08-security.md) |
-| Diagnose a startup, discovery, database, or UI problem | [Troubleshooting](09-troubleshooting.md) |
-| Build, test, or release a change | [Development](10-development.md) |
+| Install on a new AlmaLinux host | [Installation](installation.md) |
+| Change ping frequency, gateway, ports, or history | [Configuration](configuration.md) |
+| Restart, upgrade, back up, or restore the service | [Operations](operations.md) |
+| Decide whether the evidence implicates the ISP | [Evidence model](evidence-model.md) and [Interpreting results](interpreting-results.md) |
+| Understand a card, chart, status, or threshold | [Interpreting results](interpreting-results.md) |
+| Query PostgreSQL or consume the API | [Data and API](data-and-api.md) |
+| Harden access or renew a certificate | [Security](security.md) |
+| Diagnose a startup, discovery, database, or UI problem | [Troubleshooting](troubleshooting.md) |
+| Understand an internal component or failure path | [Architecture](architecture.md) |
+| Build, test, or release a change | [Development](development.md) |
 
-Return to the [project README](../README.md) for the concise product overview.
+Return to the [project README](../README.md) for the product overview and
+installation summary.

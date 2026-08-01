@@ -1,4 +1,4 @@
-# 1 · Evidence model
+# Evidence model
 
 Uplink Ledger is designed to locate the first **observable** change in path
 quality. It does not claim that every router answers ICMP equally, that an
@@ -154,5 +154,3 @@ flowchart LR
     TIME --> EXP["CSV, charts, and SQL record"]
     EXP --> CLAIM["Narrow, evidence-backed claim"]
 ```
-
-Next: [Install Uplink Ledger](02-installation.md).

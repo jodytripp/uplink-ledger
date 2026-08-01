@@ -9,7 +9,7 @@ body:
         Thanks for reporting a problem. Redact public addresses, certificates,
         keys, credentials, and private network details before submitting.
         Follow the symptom path in
-        https://github.com/jodytripp/uplink-ledger/blob/main/docs/09-troubleshooting.md
+        https://github.com/jodytripp/uplink-ledger/blob/main/docs/troubleshooting.md
         first and include the relevant result below.
 
   - type: input

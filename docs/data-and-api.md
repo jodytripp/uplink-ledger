@@ -1,4 +1,4 @@
-# 7 · Data model, API, and exports
+# Data model, API, and exports
 
 PostgreSQL is the authoritative history store. The CSV file is an export and
 recovery mirror. The browser API exposes bounded in-memory history plus live
@@ -265,5 +265,3 @@ sudo -u ispmon psql -d isp_loss_monitor
 The database and CSV can reveal private addresses, public addresses, outage
 times, and usage patterns. Restrict filesystem and database access, redact
 exports before sharing publicly, and treat backups as operationally sensitive.
-
-Next: [Secure the deployment](08-security.md).
