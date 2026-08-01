@@ -8,6 +8,9 @@ body:
       value: |
         Thanks for reporting a problem. Redact public addresses, certificates,
         keys, credentials, and private network details before submitting.
+        Follow the symptom path in
+        https://github.com/jodytripp/uplink-ledger/blob/main/docs/09-troubleshooting.md
+        first and include the relevant result below.
 
   - type: input
     id: version
@@ -46,6 +49,14 @@ body:
       required: true
 
   - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics already performed
+      description: Which troubleshooting section and commands did you use, and what did they show?
+    validations:
+      required: true
+
+  - type: textarea
     id: logs
     attributes:
       label: Relevant redacted logs
@@ -58,6 +69,8 @@ body:
       label: Pre-submission checks
       options:
         - label: I searched existing issues for this problem.
+          required: true
+        - label: I followed the relevant troubleshooting guide.
           required: true
         - label: I removed sensitive addresses, keys, certificates, and credentials.
           required: true

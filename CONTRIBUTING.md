@@ -1,58 +1,107 @@
 # Contributing to Uplink Ledger
 
-Thanks for helping improve Uplink Ledger. Changes should preserve its central
-goal: collect defensible Internet-path evidence without overstating what ICMP
-measurements prove.
+Uplink Ledger exists to collect defensible Internet-path evidence without
+claiming more than ICMP observations can prove. Contributions should preserve
+that restraint, the small operational footprint, and upgrade compatibility.
+
+## Start with the system model
+
+Read these before changing behavior:
+
+1. [Evidence model](docs/01-evidence-model.md)
+2. [Configuration contracts](docs/03-configuration.md)
+3. [Architecture and technology choices](docs/06-architecture.md)
+4. [Development and release guide](docs/10-development.md)
+
+Use [Troubleshooting](docs/09-troubleshooting.md) before treating an
+installation or environment problem as an application defect.
+
+## Contribution flow
+
+```mermaid
+flowchart LR
+    ISSUE["Describe problem or focused change"] --> BRANCH["Create focused branch"]
+    BRANCH --> CODE["Implement behavior"]
+    CODE --> TEST["Add or update tests"]
+    TEST --> DOC["Update lifecycle documentation"]
+    DOC --> CHECK["Run full validation"]
+    CHECK --> PR["Open pull request with evidence"]
+```
 
 ## Development setup
 
-The runtime uses only Python's standard library. A local PostgreSQL server is
-not required for the unit tests because database calls are isolated behind the
-`PostgresStore` interface.
+The production runtime uses only Python's standard library. Unit tests do not
+require a running PostgreSQL server because database subprocess calls are
+isolated.
 
 ```sh
 git clone https://github.com/jodytripp/uplink-ledger.git
 cd uplink-ledger
-python3 -m unittest discover -s tests -v
-```
 
-Before submitting a change, run:
-
-```sh
-python3 -m py_compile isp_loss_monitor.py import_csv_to_postgres.py
+python3 -m py_compile isp_loss_monitor.py import_csv_to_postgres.py scripts/check_docs.py
+python3 scripts/check_docs.py
 sh -n install.sh
 python3 -m unittest discover -s tests -v
 ```
 
+Two tests create temporary loopback HTTP servers, so the local environment
+must allow binding ephemeral localhost ports.
+
 ## Design expectations
 
-- Keep the installed runtime free of third-party Python dependencies unless a
-  strong operational reason justifies adding one.
-- Preserve AlmaLinux 10 and `systemd` compatibility.
-- Treat PostgreSQL as mandatory and authoritative.
-- Keep completed intervals aligned to exact wall-clock boundaries.
-- Discard incomplete intervals rather than recording misleading aggregates.
-- Prefer conservative diagnosis language when router behavior, ICMP rate
-  limiting, or path asymmetry makes attribution uncertain.
-- Preserve existing configuration and data paths during upgrades.
-- Keep the dashboard usable without a JavaScript build toolchain.
-- Add or update tests for behavioral changes.
+- Keep the installed runtime free of third-party Python packages unless an
+  architectural need outweighs the deployment and maintenance cost.
+- Preserve AlmaLinux 10 and native `systemd` operation.
+- Keep PostgreSQL mandatory and authoritative.
+- Preserve exact wall-clock intervals and parallel target correlation.
+- Discard incomplete intervals rather than manufacturing complete-looking
+  aggregates.
+- Prefer conservative diagnosis language when rate limiting, asymmetry, or
+  Router behavior prevents a narrow attribution.
+- Preserve existing service, role, database, configuration, and data paths
+  unless an explicit migration is included.
+- Keep the dashboard independent of a JavaScript build toolchain and external
+  runtime resources.
+- Add focused regression coverage for behavioral changes.
+- Update the guide that owns the affected lifecycle stage; the mapping is in
+  [Development and releases](docs/10-development.md#documentation-changes-are-product-changes).
 
 ## Pull requests
 
-Keep pull requests focused. Include:
+Keep each pull request focused. Include:
 
-- the problem being solved;
-- the behavior before and after the change;
+- the operator or monitoring problem;
+- behavior before and after;
+- evidence supporting a changed diagnosis or threshold;
 - validation performed;
-- installation or compatibility impact; and
-- screenshots for material dashboard changes, with real addresses redacted.
+- installation, persistence, security, and upgrade impact;
+- documentation updated; and
+- redacted screenshots for material dashboard changes.
 
 Do not commit production certificates, private keys, public IP addresses,
-private network diagrams, database dumps, or unredacted monitoring exports.
+private network diagrams, database dumps, discovery caches, monitoring CSVs,
+or unredacted screenshots.
 
-## Bug reports
+## Compatibility review
 
-Use the bug-report template and include the Uplink Ledger version, AlmaLinux
-version, PostgreSQL version, relevant service logs, and steps to reproduce.
-Redact public IP addresses and any internal details you do not want published.
+Before changing a stored or operational contract, identify the migration for:
+
+- PostgreSQL tables, keys, or data types;
+- CSV header/schema version;
+- `ISPMON_ARGS` and command-line options;
+- discovery cache schema;
+- static API response fields;
+- `/opt`, `/etc`, and `/var/lib` paths;
+- `ispmon` identity and `isp-loss-monitor.service`; and
+- chart history or diagnosis semantics.
+
+An existing operator should be able to upgrade without losing history,
+configuration, certificates, or discovery identity.
+
+## Bug reports and feature proposals
+
+Use the repository templates. Include the Uplink Ledger version, AlmaLinux and
+PostgreSQL versions, relevant redacted journal lines, steps to reproduce, and
+which guide was followed.
+
+Security issues follow [SECURITY.md](SECURITY.md), not the public issue tracker.

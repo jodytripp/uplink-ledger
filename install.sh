@@ -37,7 +37,10 @@ if ! getent passwd "${SERVICE_USER}" >/dev/null 2>&1; then
         "${SERVICE_USER}"
 fi
 
-install -d -o root -g root -m 0755 "${APP_DIR}" "${APP_DIR}/web"
+install -d -o root -g root -m 0755 \
+    "${APP_DIR}" \
+    "${APP_DIR}/web" \
+    "${APP_DIR}/docs"
 install -d -o root -g "${SERVICE_USER}" -m 0750 "${CONFIG_DIR}"
 install -d -o "${SERVICE_USER}" -g "${SERVICE_USER}" -m 0750 "${DATA_DIR}"
 install -d -o root -g root -m 0755 /etc/sysconfig
@@ -51,6 +54,15 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0644 \
     "${SCRIPT_DIR}/README.md" \
     "${APP_DIR}/README.md"
+install -o root -g root -m 0644 \
+    "${SCRIPT_DIR}/CHANGELOG.md" \
+    "${SCRIPT_DIR}/CONTRIBUTING.md" \
+    "${SCRIPT_DIR}/LICENSE" \
+    "${SCRIPT_DIR}/SECURITY.md" \
+    "${APP_DIR}/"
+install -o root -g root -m 0644 \
+    "${SCRIPT_DIR}"/docs/*.md \
+    "${APP_DIR}/docs/"
 install -o root -g root -m 0644 \
     "${SCRIPT_DIR}/web/index.html" \
     "${APP_DIR}/web/index.html"
@@ -76,10 +88,12 @@ echo "Uplink Ledger ${APP_DIR}/isp_loss_monitor.py installed."
 echo
 echo "Next:"
 echo "  1. Create the local PostgreSQL role/database for peer-auth user ${SERVICE_USER}"
-echo "  2. Import the existing CSV with import_csv_to_postgres.py"
-echo "  3. Put the certificate at ${CONFIG_DIR}/server.crt"
-echo "  4. Put the unencrypted private key at ${CONFIG_DIR}/server.key"
-echo "  5. Run: chown root:${SERVICE_USER} ${CONFIG_DIR}/server.crt ${CONFIG_DIR}/server.key"
-echo "  6. Run: chmod 0640 ${CONFIG_DIR}/server.crt ${CONFIG_DIR}/server.key"
-echo "  7. Review ${SYSCONFIG_FILE}"
-echo "  8. Run: systemctl enable --now isp-loss-monitor"
+echo "  2. Configure and verify PostgreSQL peer authentication"
+echo "  3. Optionally import existing CSV history with import_csv_to_postgres.py"
+echo "  4. Put the certificate at ${CONFIG_DIR}/server.crt"
+echo "  5. Put the unencrypted private key at ${CONFIG_DIR}/server.key"
+echo "  6. Run: chown root:${SERVICE_USER} ${CONFIG_DIR}/server.crt ${CONFIG_DIR}/server.key"
+echo "  7. Run: chmod 0640 ${CONFIG_DIR}/server.crt ${CONFIG_DIR}/server.key"
+echo "  8. Review ${SYSCONFIG_FILE}"
+echo "  9. Run: systemctl enable --now isp-loss-monitor"
+echo " 10. Read: ${APP_DIR}/docs/README.md"

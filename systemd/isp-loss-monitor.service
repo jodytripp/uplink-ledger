@@ -1,6 +1,8 @@
 [Unit]
 Description=Uplink Ledger Internet-path quality monitor
 Documentation=file:///opt/isp-loss-monitor/README.md
+Documentation=file:///opt/isp-loss-monitor/docs/README.md
+Documentation=https://github.com/jodytripp/uplink-ledger
 Wants=network-online.target
 Requires=postgresql.service
 After=network-online.target postgresql.service

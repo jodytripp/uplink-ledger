@@ -3,6 +3,13 @@ description: Suggest an improvement to Uplink Ledger
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Review the evidence and architecture guides before proposing changes to
+        diagnosis, dependencies, persistence, or deployment:
+        https://github.com/jodytripp/uplink-ledger/tree/main/docs
+
   - type: textarea
     id: problem
     attributes:
@@ -24,6 +31,12 @@ body:
     attributes:
       label: Evidence and classification impact
       description: Could this change affect how packet loss or fault attribution is interpreted?
+
+  - type: textarea
+    id: operations
+    attributes:
+      label: Operational and compatibility impact
+      description: Does this add a dependency or change installation, configuration, data, security, or upgrades?
 
   - type: textarea
     id: alternatives

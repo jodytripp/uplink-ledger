@@ -7,6 +7,26 @@ and this project uses semantic versioning.
 
 ## [Unreleased]
 
+### Added
+
+- A lifecycle-ordered documentation set covering the evidence model,
+  installation, configuration, operations, result interpretation,
+  architecture, data/API, security, troubleshooting, and development.
+- GitHub-native Mermaid diagrams for the network path, sampling lifecycle,
+  classification tree, deployment, discovery state, persistence, data model,
+  security boundaries, diagnostics, and release process.
+- Detailed technology-stack rationale and explicit design tradeoffs.
+- A standard-library documentation validator executed by GitHub Actions.
+
+### Changed
+
+- Reworked the project README as a product overview and guided documentation
+  entry point.
+- Expanded contribution and security policies and linked issue/pull-request
+  templates to the relevant guides.
+- Install the complete documentation set with the application so relative
+  help links also work from `/opt/isp-loss-monitor`.
+
 ## [1.3.0] - 2026-07-31
 
 ### Added
